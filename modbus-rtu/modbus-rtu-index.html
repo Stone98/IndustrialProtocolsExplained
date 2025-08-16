@@ -1,0 +1,1484 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modbus RTU Introduction</title>
+    <link rel="stylesheet" href="modbus-rtu-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-logo"><a href="#introduction" class="logo-link">Modbus RTU Guide</a></h1>
+            <ul class="nav-menu">
+                <li><a href="#introduction" class="nav-link">Introduction</a></li>
+                <li><a href="#api" class="nav-link">API</a></li>
+                <li><a href="#terms" class="nav-link">Terms</a></li>
+                <li><a href="#examples" class="nav-link">Examples</a></li>
+                <li><a href="#client" class="nav-link">Client</a></li>
+                <li><a href="#server" class="nav-link">Server</a></li>
+                <li><a href="#gotchas" class="nav-link">Gotchas</a></li>
+                <li><a href="#quiz" class="nav-link">Quiz</a></li>
+                <li><a href="../modbus-tcp/modbus-tcp-index.html" class="nav-link external-link" onclick="navigateToTCP(event)">TCP Guide</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Introduction Section -->
+        <section id="introduction" class="section">
+            <div class="container">
+                <h2>Introduction to Modbus RTU</h2>
+                <div class="intro-content">
+                    <div class="intro-text">
+                        <p>Modbus RTU (Remote Terminal Unit) is a serial communication protocol used in industrial automation systems to enable communication between devices over RS-232, RS-422, or RS-485 networks. It's a compact, binary representation of the Modbus protocol.</p>
+                        
+                        <h3>What is Modbus RTU?</h3>
+                        <p>Modbus RTU is a serial communication variant of the Modbus protocol developed by Modicon in 1979. RTU stands for "Remote Terminal Unit" and uses a compact binary format for data transmission over serial links.</p>
+                        
+                        <h3>Key Features of Modbus RTU</h3>
+                        <ul>
+                            <li><strong>Binary Format:</strong> Compact data representation for efficient transmission</li>
+                            <li><strong>Serial Communication:</strong> Uses RS-232, RS-422, or RS-485 physical layers</li>
+                            <li><strong>Master-Slave Architecture:</strong> Clear communication hierarchy</li>
+                            <li><strong>CRC Error Checking:</strong> 16-bit CRC for data integrity</li>
+                            <li><strong>Multi-drop Networks:</strong> Up to 247 devices on one network</li>
+                        </ul>
+                        
+                        <h3>How Modbus RTU Works</h3>
+                        <p>Modbus RTU follows a master-slave model where:</p>
+                        <ul>
+                            <li><strong>Master:</strong> Initiates all communications and polls slaves</li>
+                            <li><strong>Slave:</strong> Responds only when addressed by master</li>
+                            <li><strong>Address Field:</strong> 1-247 for device addressing, 0 for broadcast</li>
+                            <li><strong>Silent Interval:</strong> 3.5 character times between messages</li>
+                        </ul>
+                    </div>
+                    <div class="intro-diagram">
+                        <div class="modbus-diagram">
+                            <div class="client-box">
+                                <h4>Modbus Master</h4>
+                                <p>Initiates communication</p>
+                            </div>
+                            <div class="arrow">→</div>
+                            <div class="server-box">
+                                <h4>Modbus Slave</h4>
+                                <p>Responds when polled</p>
+                            </div>
+                        </div>
+                        
+                        <div class="practical-example">
+                            <h4>Practical Example: Flow Meter Reading</h4>
+                            <div class="example-diagram">
+                                <div class="device display-unit">
+                                    <div class="device-header">
+                                        <h5>PLC Controller</h5>
+                                        <small>(Modbus Master - Address: 1)</small>
+                                    </div>
+                                    <div class="device-content">
+                                        <div class="display-screen">
+                                            <div class="screen-header">Flow Monitor</div>
+                                            <div class="screen-content">
+                                                <div class="displayed-temp">
+                                                    <span class="display-label">Current Flow:</span>
+                                                    <span class="display-value">125.7 L/min</span>
+                                                </div>
+                                                <div class="status-indicator">
+                                                    <span class="status-dot online"></span>
+                                                    <span>Connected</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="communication-flow">
+                                    <div class="communication-step">
+                                        <div class="step-number">1</div>
+                                        <div class="step-description">
+                                            <strong>Request:</strong> Read Flow Rate<br>
+                                            <span class="message-details">Address: 05, Function: 03, Register: 0</span>
+                                        </div>
+                                        <div class="flow-arrow">→</div>
+                                    </div>
+                                    
+                                    <div class="communication-step">
+                                        <div class="step-number">2</div>
+                                        <div class="step-description">
+                                            <strong>Response:</strong> Flow Data<br>
+                                            <span class="message-details">Value: 1257 (125.7 L/min)</span>
+                                        </div>
+                                        <div class="flow-arrow">←</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="device temperature-sensor">
+                                    <div class="device-header">
+                                        <h5>Flow Meter Device</h5>
+                                        <small>(Modbus Slave - Address: 5)</small>
+                                    </div>
+                                    <div class="device-content">
+                                        <div class="sensor-reading">
+                                            <span class="temp-icon">💧</span>
+                                            <span class="temp-value">125.7 L/min</span>
+                                        </div>
+                                        <div class="register-info">
+                                            <strong>Register 40001:</strong> 1257<br>
+                                            <small>(Flow Rate × 10)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="example-explanation">
+                                <h5>How it Works:</h5>
+                                <ol>
+                                    <li><strong>Flow Measurement:</strong> The flow meter continuously measures flow rate (125.7 L/min)</li>
+                                    <li><strong>Data Storage:</strong> Value is stored in Holding Register 40001 as integer 1257 (flow × 10)</li>
+                                    <li><strong>Master Request:</strong> PLC Controller polls the flow meter using slave address 5</li>
+                                    <li><strong>Slave Response:</strong> Flow Meter responds with raw value 1257</li>
+                                    <li><strong>Data Processing:</strong> PLC divides by 10 to get 125.7 L/min</li>
+                                    <li><strong>Control Logic:</strong> PLC uses flow data for process control decisions</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- API Section -->
+        <section id="api" class="section">
+            <div class="container">
+                <h2>Modbus RTU API Reference</h2>
+                
+                <div class="api-overview">
+                    <h3>Function Codes</h3>
+                    <p>Modbus RTU uses the same function codes as other Modbus variants:</p>
+                </div>
+
+                <div class="function-codes">
+                    <div class="function-card">
+                        <h4>01 - Read Coils</h4>
+                        <p>Read status of discrete outputs (coils)</p>
+                        <div class="code-example">
+                            <strong>Request:</strong> Slave Address + Function Code + Starting Address + Quantity + CRC
+                        </div>
+                    </div>
+                    
+                    <div class="function-card">
+                        <h4>02 - Read Discrete Inputs</h4>
+                        <p>Read status of discrete inputs</p>
+                        <div class="code-example">
+                            <strong>Request:</strong> Slave Address + Function Code + Starting Address + Quantity + CRC
+                        </div>
+                    </div>
+                    
+                    <div class="function-card">
+                        <h4>03 - Read Holding Registers</h4>
+                        <p>Read values from holding registers</p>
+                        <div class="code-example">
+                            <strong>Request:</strong> Slave Address + Function Code + Starting Address + Quantity + CRC
+                        </div>
+                    </div>
+                    
+                    <div class="function-card">
+                        <h4>04 - Read Input Registers</h4>
+                        <p>Read values from input registers</p>
+                        <div class="code-example">
+                            <strong>Request:</strong> Slave Address + Function Code + Starting Address + Quantity + CRC
+                        </div>
+                    </div>
+                    
+                    <div class="function-card">
+                        <h4>05 - Write Single Coil</h4>
+                        <p>Write a single coil (discrete output)</p>
+                        <div class="code-example">
+                            <strong>Request:</strong> Slave Address + Function Code + Address + Value + CRC
+                        </div>
+                    </div>
+                    
+                    <div class="function-card">
+                        <h4>06 - Write Single Register</h4>
+                        <p>Write a single holding register</p>
+                        <div class="code-example">
+                            <strong>Request:</strong> Slave Address + Function Code + Address + Value + CRC
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-format">
+                    <h3>RTU Message Format</h3>
+                    <div class="format-diagram">
+                        <div class="format-header">
+                            <h4>Modbus RTU Frame Structure</h4>
+                        </div>
+                        <div class="format-fields">
+                            <div class="field">
+                                <strong>Silent Interval</strong><br>
+                                <small>3.5 char times</small>
+                            </div>
+                            <div class="field">
+                                <strong>Slave Address</strong><br>
+                                <small>1 byte</small>
+                            </div>
+                            <div class="field">
+                                <strong>Function Code</strong><br>
+                                <small>1 byte</small>
+                            </div>
+                            <div class="field">
+                                <strong>Data</strong><br>
+                                <small>N bytes</small>
+                            </div>
+                            <div class="field">
+                                <strong>CRC</strong><br>
+                                <small>2 bytes</small>
+                            </div>
+                            <div class="field">
+                                <strong>Silent Interval</strong><br>
+                                <small>3.5 char times</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rtu-specifics">
+                    <h3>RTU-Specific Features</h3>
+                    <div class="rtu-features">
+                        <div class="feature-card">
+                            <h4>🔍 CRC Error Detection</h4>
+                            <p>16-bit Cyclic Redundancy Check for data integrity</p>
+                            <div class="feature-details">
+                                <ul>
+                                    <li>Polynomial: 0xA001 (reverse of 0x8005)</li>
+                                    <li>Initial value: 0xFFFF</li>
+                                    <li>Calculated over address, function, and data fields</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4>⏱️ Silent Intervals</h4>
+                            <p>Message framing using timing gaps</p>
+                            <div class="feature-details">
+                                <ul>
+                                    <li>3.5 character times before message start</li>
+                                    <li>3.5 character times after message end</li>
+                                    <li>No gaps allowed within message frame</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="feature-card">
+                            <h4>📡 Serial Parameters</h4>
+                            <p>Common serial communication settings</p>
+                            <div class="feature-details">
+                                <ul>
+                                    <li>Baud rates: 9600, 19200, 38400, 57600, 115200</li>
+                                    <li>Data bits: 8 (standard)</li>
+                                    <li>Parity: Even, Odd, or None</li>
+                                    <li>Stop bits: 1 or 2</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Terms Section -->
+        <section id="terms" class="section">
+            <div class="container">
+                <h2>Modbus RTU Terminology</h2>
+                
+                <div class="terms-intro">
+                    <p>Understanding Modbus RTU terminology is essential for effective implementation. Here are the key concepts specific to serial Modbus communication.</p>
+                </div>
+
+                <div class="terms-grid">
+                    <div class="term-card">
+                        <h3>RTU (Remote Terminal Unit)</h3>
+                        <div class="term-details">
+                            <div class="term-description">
+                                <p><strong>Definition:</strong> Binary encoding format for Modbus messages over serial communications.</p>
+                                <p><strong>Key Characteristics:</strong></p>
+                                <ul>
+                                    <li>Compact binary format (vs. ASCII format)</li>
+                                    <li>Higher data throughput than ASCII</li>
+                                    <li>Uses 8-bit binary representation</li>
+                                    <li>Industry standard for serial Modbus</li>
+                                </ul>
+                                <p><strong>Comparison:</strong> More efficient than Modbus ASCII but less human-readable</p>
+                            </div>
+                            <div class="term-example">
+                                <h4>Example:</h4>
+                                <code>RTU: 01 03 00 00 00 01 84 0A<br>
+                                ASCII: :010300000001FA</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Slave Address</h3>
+                        <div class="term-details">
+                            <div class="term-description">
+                                <p><strong>Definition:</strong> 8-bit identifier for devices on the serial network.</p>
+                                <p><strong>Address Ranges:</strong></p>
+                                <ul>
+                                    <li>1-247: Valid slave device addresses</li>
+                                    <li>0: Broadcast address (no response expected)</li>
+                                    <li>248-255: Reserved addresses</li>
+                                </ul>
+                                <p><strong>Network Topology:</strong> All devices share the same serial bus</p>
+                            </div>
+                            <div class="term-example">
+                                <h4>Example:</h4>
+                                <code>Address 01: Main PLC<br>
+                                Address 05: Flow Meter<br>
+                                Address 10: Temperature Sensor</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>CRC (Cyclic Redundancy Check)</h3>
+                        <div class="term-details">
+                            <div class="term-description">
+                                <p><strong>Definition:</strong> 16-bit error detection mechanism for RTU messages.</p>
+                                <p><strong>Implementation:</strong></p>
+                                <ul>
+                                    <li>Calculated over entire message except CRC field</li>
+                                    <li>Appended as last 2 bytes (low byte first)</li>
+                                    <li>Receiver recalculates and compares</li>
+                                    <li>Polynomial: 0xA001</li>
+                                </ul>
+                            </div>
+                            <div class="term-example">
+                                <h4>Example:</h4>
+                                <code>Message: 01 03 00 00 00 01<br>
+                                CRC: 84 0A<br>
+                                Complete: 01 03 00 00 00 01 84 0A</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Silent Interval</h3>
+                        <div class="term-details">
+                            <div class="term-description">
+                                <p><strong>Definition:</strong> Timing gap used to frame RTU messages on serial networks.</p>
+                                <p><strong>Requirements:</strong></p>
+                                <ul>
+                                    <li>3.5 character times minimum</li>
+                                    <li>Required before and after each message</li>
+                                    <li>No gaps allowed within message</li>
+                                    <li>Timing depends on baud rate</li>
+                                </ul>
+                            </div>
+                            <div class="term-example">
+                                <h4>Example:</h4>
+                                <code>At 9600 baud: 3.5 × (11 bits/char ÷ 9600 bps) = 4.0ms<br>
+                                At 115200 baud: minimum 1.75ms</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>RS-485 Network</h3>
+                        <div class="term-details">
+                            <div class="term-description">
+                                <p><strong>Definition:</strong> Differential serial communication standard commonly used with Modbus RTU.</p>
+                                <p><strong>Advantages:</strong></p>
+                                <ul>
+                                    <li>Multi-drop capability (up to 32 devices)</li>
+                                    <li>Long distance transmission (up to 4000 feet)</li>
+                                    <li>High noise immunity</li>
+                                    <li>Half-duplex communication</li>
+                                </ul>
+                            </div>
+                            <div class="term-example">
+                                <h4>Example:</h4>
+                                <code>Two-wire RS-485:<br>
+                                A+ (non-inverting)<br>
+                                B- (inverting)<br>
+                                + 120Ω termination resistors</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Baud Rate</h3>
+                        <div class="term-details">
+                            <div class="term-description">
+                                <p><strong>Definition:</strong> Data transmission speed in bits per second.</p>
+                                <p><strong>Common Rates:</strong></p>
+                                <ul>
+                                    <li>9600 bps: Most common, good for long distances</li>
+                                    <li>19200 bps: Good balance of speed and reliability</li>
+                                    <li>38400 bps and higher: Shorter distances only</li>
+                                    <li>All devices must use same baud rate</li>
+                                </ul>
+                            </div>
+                            <div class="term-example">
+                                <h4>Example:</h4>
+                                <code>Network Settings:<br>
+                                Baud: 19200<br>
+                                Data: 8 bits<br>
+                                Parity: Even<br>
+                                Stop: 1 bit</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="addressing-explanation">
+                    <h3>Address Formats & Configuration Challenges</h3>
+                    <div class="addressing-cards">
+                        <div class="addressing-card">
+                            <h4>Traditional 5-Digit Addressing</h4>
+                            <p>Same as TCP version but with serial considerations:</p>
+                            <ul>
+                                <li><strong>0xxxx:</strong> Coils (00001-09999)</li>
+                                <li><strong>1xxxx:</strong> Discrete Inputs (10001-19999)</li>
+                                <li><strong>3xxxx:</strong> Input Registers (30001-39999)</li>
+                                <li><strong>4xxxx:</strong> Holding Registers (40001-49999)</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="addressing-card">
+                            <h4>RTU Protocol Data Unit (PDU) Addressing</h4>
+                            <p>Direct register addressing in RTU messages:</p>
+                            <ul>
+                                <li><strong>0-based indexing:</strong> Address 0 = first register</li>
+                                <li><strong>Function code defines type:</strong> No prefix needed</li>
+                                <li><strong>Example:</strong> Traditional 40001 = PDU address 0</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="addressing-card manufacturer-differences">
+                            <h4>⚠️ Serial-Specific Challenges</h4>
+                            <p><strong>Additional RTU Considerations:</strong></p>
+                            <ul>
+                                <li><strong>Timing sensitivity:</strong> Silent intervals must be precise</li>
+                                <li><strong>Baud rate consistency:</strong> All devices must match</li>
+                                <li><strong>Termination resistors:</strong> Required for RS-485 networks</li>
+                                <li><strong>Cable length limits:</strong> Distance affects maximum baud rate</li>
+                            </ul>
+                            <div class="warning-box">
+                                <strong>RTU Impact:</strong> Serial communication adds timing and electrical considerations beyond TCP!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-format-challenges">
+                    <h3>RTU Data Format & Timing Challenges</h3>
+                    
+                    <div class="format-cards">
+                        <div class="format-card">
+                            <h4>⏱️ Timing Requirements</h4>
+                            <div class="timing-explanation">
+                                <p><strong>Critical Timing Constraints:</strong></p>
+                                
+                                <div class="timing-examples">
+                                    <div class="timing-example">
+                                        <h5>Inter-Character Timeout</h5>
+                                        <p>Maximum gap between characters in a message</p>
+                                        <div class="timing-calc">
+                                            <span class="timing-value">1.5 character times</span>
+                                        </div>
+                                        <p class="timing-note">Exceeding this breaks the message frame</p>
+                                    </div>
+                                    
+                                    <div class="timing-example">
+                                        <h5>Inter-Frame Delay</h5>
+                                        <p>Minimum gap between message frames</p>
+                                        <div class="timing-calc">
+                                            <span class="timing-value">3.5 character times</span>
+                                        </div>
+                                        <p class="timing-note">Required to detect message boundaries</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="baud-timing">
+                                    <h5>Timing Calculations by Baud Rate</h5>
+                                    <div class="timing-table">
+                                        <div class="timing-row">
+                                            <strong>9600 baud:</strong> 1 char = 1.146ms, Silent = 4.0ms
+                                        </div>
+                                        <div class="timing-row">
+                                            <strong>19200 baud:</strong> 1 char = 0.573ms, Silent = 2.0ms
+                                        </div>
+                                        <div class="timing-row">
+                                            <strong>115200 baud:</strong> 1 char = 0.096ms, Silent = 1.75ms (min)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="format-card">
+                            <h4>🔗 Serial Network Issues</h4>
+                            <div class="serial-explanation">
+                                <p><strong>Common Serial Communication Problems:</strong></p>
+                                
+                                <div class="serial-issues">
+                                    <div class="serial-issue">
+                                        <h5>Electrical Interference</h5>
+                                        <p>EMI can corrupt data on long cable runs</p>
+                                        <div class="issue-solutions">
+                                            <strong>Solutions:</strong>
+                                            <ul>
+                                                <li>Use shielded twisted pair cables</li>
+                                                <li>Proper grounding techniques</li>
+                                                <li>Avoid running parallel to power cables</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="serial-issue">
+                                        <h5>Ground Loops</h5>
+                                        <p>Potential differences between devices</p>
+                                        <div class="issue-solutions">
+                                            <strong>Solutions:</strong>
+                                            <ul>
+                                                <li>Use isolation transformers</li>
+                                                <li>Optical isolators in interfaces</li>
+                                                <li>Single point grounding strategy</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="serial-issue">
+                                        <h5>Termination Problems</h5>
+                                        <p>Improper RS-485 termination causes reflections</p>
+                                        <div class="issue-solutions">
+                                            <strong>Solutions:</strong>
+                                            <ul>
+                                                <li>120Ω resistors at both ends only</li>
+                                                <li>No termination on intermediate devices</li>
+                                                <li>Use proper RS-485 topology</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="configuration-challenges">
+                    <h3>⚠️ RTU Configuration Challenges</h3>
+                    
+                    <div class="challenge-cards">
+                        <div class="challenge-card">
+                            <h4>1. Serial Parameter Mismatch</h4>
+                            <div class="challenge-content">
+                                <p><strong>Symptom:</strong> No communication or garbled data</p>
+                                <p><strong>Causes:</strong></p>
+                                <ul>
+                                    <li>Different baud rates between devices</li>
+                                    <li>Mismatched parity settings</li>
+                                    <li>Wrong stop bit configuration</li>
+                                </ul>
+                                <p><strong>Solution:</strong> Verify all devices use identical serial parameters</p>
+                            </div>
+                        </div>
+                        
+                        <div class="challenge-card">
+                            <h4>2. Timing and Framing Errors</h4>
+                            <div class="challenge-content">
+                                <p><strong>Symptom:</strong> Intermittent communication failures</p>
+                                <p><strong>Causes:</strong></p>
+                                <ul>
+                                    <li>Incorrect silent interval implementation</li>
+                                    <li>Character gaps within messages</li>
+                                    <li>Master polling too fast</li>
+                                </ul>
+                                <p><strong>Solution:</strong> Implement proper timing according to baud rate</p>
+                            </div>
+                        </div>
+                        
+                        <div class="challenge-card">
+                            <h4>3. Network Wiring Issues</h4>
+                            <div class="challenge-content">
+                                <p><strong>Symptom:</strong> Communication works with some devices but not others</p>
+                                <p><strong>Causes:</strong></p>
+                                <ul>
+                                    <li>Improper RS-485 wiring topology</li>
+                                    <li>Missing or incorrect termination</li>
+                                    <li>Cable length exceeding limits</li>
+                                </ul>
+                                <p><strong>Solution:</strong> Follow proper RS-485 installation practices</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="best-practices-config">
+                        <h4>RTU Configuration Best Practices</h4>
+                        <div class="practices-grid">
+                            <div class="practice-item">
+                                <h5>📋 Serial Parameter Documentation</h5>
+                                <ul>
+                                    <li>Document all device serial settings</li>
+                                    <li>Use consistent parameters network-wide</li>
+                                    <li>Test with simple devices first</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="practice-item">
+                                <h5>🔧 Proper Wiring Practices</h5>
+                                <ul>
+                                    <li>Use daisy-chain topology for RS-485</li>
+                                    <li>Install termination resistors correctly</li>
+                                    <li>Maintain proper cable impedance</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="practice-item">
+                                <h5>⏱️ Timing Implementation</h5>
+                                <ul>
+                                    <li>Calculate silent intervals accurately</li>
+                                    <li>Implement proper character timeout detection</li>
+                                    <li>Allow adequate slave response time</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="practice-item">
+                                <h5>🛠️ Testing and Debugging</h5>
+                                <ul>
+                                    <li>Use serial analyzers for troubleshooting</li>
+                                    <li>Monitor CRC error rates</li>
+                                    <li>Test at maximum network loading</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-types-summary">
+                    <h3>Quick Reference Table</h3>
+                    <div class="reference-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data Type</th>
+                                    <th>Size</th>
+                                    <th>Access</th>
+                                    <th>Traditional Range</th>
+                                    <th>Read Function</th>
+                                    <th>Write Function</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Coils</td>
+                                    <td>1 bit</td>
+                                    <td>Read/Write</td>
+                                    <td>00001-09999</td>
+                                    <td>01</td>
+                                    <td>05, 15</td>
+                                </tr>
+                                <tr>
+                                    <td>Discrete Inputs</td>
+                                    <td>1 bit</td>
+                                    <td>Read Only</td>
+                                    <td>10001-19999</td>
+                                    <td>02</td>
+                                    <td>N/A</td>
+                                </tr>
+                                <tr>
+                                    <td>Input Registers</td>
+                                    <td>16 bit</td>
+                                    <td>Read Only</td>
+                                    <td>30001-39999</td>
+                                    <td>04</td>
+                                    <td>N/A</td>
+                                </tr>
+                                <tr>
+                                    <td>Holding Registers</td>
+                                    <td>16 bit</td>
+                                    <td>Read/Write</td>
+                                    <td>40001-49999</td>
+                                    <td>03</td>
+                                    <td>06, 16</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Examples Section -->
+        <section id="examples" class="section">
+            <div class="container">
+                <h2>Practical Examples</h2>
+                
+                <div class="examples-grid">
+                    <div class="example-card">
+                        <h3>Python RTU Client Example</h3>
+                        <pre><code class="language-python">from pymodbus.client.sync import ModbusSerialClient
+
+# Create RTU client connection
+client = ModbusSerialClient(
+    method='rtu',
+    port='/dev/ttyUSB0',  # Linux
+    # port='COM3',        # Windows
+    baudrate=19200,
+    timeout=1,
+    parity='E',
+    stopbits=1,
+    bytesize=8
+)
+
+# Connect to serial port
+connection = client.connect()
+if connection:
+    print("Connected to Modbus RTU")
+    
+    # Read holding registers from slave address 5
+    result = client.read_holding_registers(0, 10, unit=5)
+    if result.isError():
+        print("Error reading registers")
+    else:
+        print(f"Register values: {result.registers}")
+    
+    # Write single register to slave address 5
+    client.write_register(0, 1234, unit=5)
+    
+    # Close connection
+    client.close()
+else:
+    print("Failed to connect to serial port")</code></pre>
+                    </div>
+                    
+                    <div class="example-card">
+                        <h3>Node.js RTU Client Example</h3>
+                        <pre><code class="language-javascript">const ModbusRTU = require("modbus-serial");
+const client = new ModbusRTU();
+
+async function modbusRTUExample() {
+    try {
+        // Connect to RTU via serial port
+        await client.connectRTUBuffered("/dev/ttyUSB0", {
+            baudRate: 19200,
+            dataBits: 8,
+            stopBits: 1,
+            parity: 'even'
+        });
+        
+        // Set slave ID
+        client.setID(5);
+        
+        console.log("Connected to Modbus RTU");
+        
+        // Read holding registers
+        const data = await client.readHoldingRegisters(0, 10);
+        console.log("Register values:", data.data);
+        
+        // Write single register
+        await client.writeRegister(0, 5678);
+        console.log("Register written successfully");
+        
+        client.close();
+    } catch (error) {
+        console.error("Modbus RTU error:", error);
+    }
+}
+
+modbusRTUExample();</code></pre>
+                    </div>
+                    
+                    <div class="example-card">
+                        <h3>C# RTU Client Example</h3>
+                        <pre><code class="language-csharp">using EasyModbus;
+
+class Program
+{
+    static void Main()
+    {
+        ModbusClient modbusClient = new ModbusClient();
+        
+        try
+        {
+            // Configure serial port
+            modbusClient.SerialPort = "COM3";
+            modbusClient.Baudrate = 19200;
+            modbusClient.Parity = System.IO.Ports.Parity.Even;
+            modbusClient.StopBits = System.IO.Ports.StopBits.One;
+            modbusClient.UnitIdentifier = 5; // Slave address
+            
+            modbusClient.Connect();
+            Console.WriteLine("Connected to Modbus RTU");
+            
+            // Read holding registers
+            int[] readData = modbusClient.ReadHoldingRegisters(0, 10);
+            Console.WriteLine($"First register value: {readData[0]}");
+            
+            // Write single register
+            modbusClient.WriteSingleRegister(0, 9999);
+            Console.WriteLine("Register written successfully");
+            
+            modbusClient.Disconnect();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+}</code></pre>
+                    </div>
+                    
+                    <div class="example-card">
+                        <h3>Arduino RTU Slave Example</h3>
+                        <pre><code class="language-cpp">#include <ModbusRtu.h>
+#include <SoftwareSerial.h>
+
+// Create Modbus RTU slave with ID 5
+Modbus slave(5, Serial, 0); // ID, Serial Port, Control Pin
+
+// Data array for Modbus registers
+uint16_t au16data[16] = {
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, -1
+};
+
+void setup() {
+  // Configure serial communication
+  Serial.begin(19200, SERIAL_8E1); // 19200 baud, 8 data, even parity, 1 stop
+  
+  // Start Modbus slave
+  slave.begin(19200);
+  
+  // Set up some initial values
+  au16data[0] = 1234;  // Holding register 40001
+  au16data[1] = 5678;  // Holding register 40002
+}
+
+void loop() {
+  // Update register values (simulate sensor readings)
+  au16data[0] = analogRead(A0);  // Read analog input
+  au16data[1] = digitalRead(2) ? 1 : 0; // Read digital input
+  
+  // Poll for Modbus messages
+  slave.poll(au16data, 16);
+  
+  delay(100);
+}</code></pre>
+                    </div>
+                </div>
+                
+                <div class="timing-examples">
+                    <h3>RTU Timing Examples</h3>
+                    <div class="timing-cards">
+                        <div class="timing-card">
+                            <h4>Silent Interval Calculation</h4>
+                            <pre><code class="language-python"># Calculate silent interval for different baud rates
+def calculate_silent_interval(baud_rate):
+    # Character time = (start + 8 data + parity + stop) / baud_rate
+    # = 11 bits / baud_rate
+    char_time = 11.0 / baud_rate
+    
+    # Silent interval = 3.5 character times
+    silent_interval = 3.5 * char_time
+    
+    # Minimum 1.75ms for high baud rates
+    return max(silent_interval, 0.00175)
+
+# Examples
+print(f"9600 baud: {calculate_silent_interval(9600)*1000:.1f}ms")
+print(f"19200 baud: {calculate_silent_interval(19200)*1000:.1f}ms")
+print(f"115200 baud: {calculate_silent_interval(115200)*1000:.1f}ms")</code></pre>
+                        </div>
+                        
+                        <div class="timing-card">
+                            <h4>CRC Calculation Example</h4>
+                            <pre><code class="language-python">def calculate_crc(data):
+    """Calculate Modbus RTU CRC-16"""
+    crc = 0xFFFF
+    
+    for byte in data:
+        crc ^= byte
+        for _ in range(8):
+            if crc & 0x0001:
+                crc = (crc >> 1) ^ 0xA001
+            else:
+                crc >>= 1
+                
+    return crc
+
+# Example: Calculate CRC for read holding registers
+message = [0x01, 0x03, 0x00, 0x00, 0x00, 0x01]
+crc = calculate_crc(message)
+print(f"Message: {' '.join(f'{b:02X}' for b in message)}")
+print(f"CRC: {crc & 0xFF:02X} {(crc >> 8) & 0xFF:02X}")
+# Output: CRC: 84 0A</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Client Section -->
+        <section id="client" class="section">
+            <div class="container">
+                <h2>Modbus RTU Master Development</h2>
+                
+                <div class="client-content">
+                    <h3>Master Responsibilities</h3>
+                    <ul>
+                        <li>Initiate all communications on the serial network</li>
+                        <li>Poll slave devices in sequence</li>
+                        <li>Manage timing and framing requirements</li>
+                        <li>Handle error detection and recovery</li>
+                    </ul>
+                    
+                    <h3>Implementation Steps</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Configure Serial Port</h4>
+                                <p>Set up baud rate, parity, data bits, and stop bits to match all network devices</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Implement Timing Control</h4>
+                                <p>Ensure proper silent intervals and character timeout detection for message framing</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Format RTU Messages</h4>
+                                <p>Build binary messages with slave address, function code, data, and CRC checksum</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Handle Responses</h4>
+                                <p>Validate CRC, parse response data, and implement error recovery strategies</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>RTU-Specific Best Practices</h3>
+                    <div class="best-practices">
+                        <div class="practice">
+                            <h4>Serial Communication</h4>
+                            <ul>
+                                <li>Use hardware flow control when available</li>
+                                <li>Implement proper RS-485 driver enable/disable</li>
+                                <li>Buffer incoming data to handle timing variations</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="practice">
+                            <h4>Timing Management</h4>
+                            <ul>
+                                <li>Calculate silent intervals based on actual baud rate</li>
+                                <li>Use high-resolution timers for accurate timing</li>
+                                <li>Allow adequate response time for slower slaves</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="practice">
+                            <h4>Error Handling</h4>
+                            <ul>
+                                <li>Validate CRC on all received messages</li>
+                                <li>Implement timeout and retry mechanisms</li>
+                                <li>Log communication errors for network diagnostics</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="practice">
+                            <h4>Network Management</h4>
+                            <ul>
+                                <li>Poll slaves in round-robin fashion</li>
+                                <li>Adjust polling rate based on network performance</li>
+                                <li>Implement slave health monitoring</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Server Section -->
+        <section id="server" class="section">
+            <div class="container">
+                <h2>Modbus RTU Slave Development</h2>
+                
+                <div class="server-content">
+                    <h3>Slave Responsibilities</h3>
+                    <ul>
+                        <li>Monitor serial line for incoming messages</li>
+                        <li>Respond only when addressed by master</li>
+                        <li>Maintain local data model (registers, coils)</li>
+                        <li>Implement proper timing and CRC validation</li>
+                    </ul>
+                    
+                    <h3>Data Model (Same as TCP)</h3>
+                    <div class="data-model">
+                        <div class="data-type">
+                            <h4>Coils (Discrete Outputs)</h4>
+                            <p>1-bit read/write values, typically representing digital outputs</p>
+                            <div class="address-range">Address Range: 00001 - 09999</div>
+                        </div>
+                        
+                        <div class="data-type">
+                            <h4>Discrete Inputs</h4>
+                            <p>1-bit read-only values, typically representing digital inputs</p>
+                            <div class="address-range">Address Range: 10001 - 19999</div>
+                        </div>
+                        
+                        <div class="data-type">
+                            <h4>Input Registers</h4>
+                            <p>16-bit read-only values, typically representing analog inputs</p>
+                            <div class="address-range">Address Range: 30001 - 39999</div>
+                        </div>
+                        
+                        <div class="data-type">
+                            <h4>Holding Registers</h4>
+                            <p>16-bit read/write values, typically representing analog outputs or configuration</p>
+                            <div class="address-range">Address Range: 40001 - 49999</div>
+                        </div>
+                    </div>
+                    
+                    <h3>Simple RTU Slave Example (Python)</h3>
+                    <pre><code class="language-python">from pymodbus.server.sync import StartSerialServer
+from pymodbus.device import ModbusDeviceIdentification
+from pymodbus.datastore import ModbusSequentialDataBlock
+from pymodbus.datastore import ModbusSlaveContext, ModbusServerContext
+
+# Create data blocks
+store = ModbusSlaveContext(
+    di=ModbusSequentialDataBlock(0, [0]*100),  # Discrete Inputs
+    co=ModbusSequentialDataBlock(0, [0]*100),  # Coils
+    hr=ModbusSequentialDataBlock(0, [0]*100),  # Holding Registers
+    ir=ModbusSequentialDataBlock(0, [0]*100)   # Input Registers
+)
+
+context = ModbusServerContext(slaves={1: store}, single=False)
+
+# Server identification
+identity = ModbusDeviceIdentification()
+identity.VendorName = 'pymodbus'
+identity.ProductCode = 'PM'
+identity.VendorUrl = 'http://github.com/bashwork/pymodbus/'
+identity.ProductName = 'pymodbus RTU Server'
+identity.ModelName = 'pymodbus RTU Server'
+identity.MajorMinorRevision = '1.0'
+
+# Start RTU server
+print("Starting Modbus RTU Server on /dev/ttyUSB0...")
+StartSerialServer(
+    context, 
+    identity=identity,
+    port='/dev/ttyUSB0',  # Serial port
+    baudrate=19200,
+    bytesize=8,
+    parity='E',
+    stopbits=1
+)</code></pre>
+                    
+                    <h3>RTU Slave Implementation Considerations</h3>
+                    <div class="considerations">
+                        <div class="consideration">
+                            <h4>Message Framing</h4>
+                            <p>Implement precise timing to detect message boundaries using silent intervals</p>
+                        </div>
+                        
+                        <div class="consideration">
+                            <h4>CRC Validation</h4>
+                            <p>Always validate incoming message CRC before processing and respond with correct CRC</p>
+                        </div>
+                        
+                        <div class="consideration">
+                            <h4>Response Timing</h4>
+                            <p>Respond within specified time limits to prevent master timeouts</p>
+                        </div>
+                        
+                        <div class="consideration">
+                            <h4>Address Filtering</h4>
+                            <p>Only respond to messages addressed to this slave or broadcast address (0)</p>
+                        </div>
+                        
+                        <div class="consideration">
+                            <h4>Hardware Interface</h4>
+                            <p>Properly control RS-485 driver enable for half-duplex communication</p>
+                        </div>
+                        
+                        <div class="consideration">
+                            <h4>Data Synchronization</h4>
+                            <p>Ensure data consistency when updating registers during communication</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modbus Gotchas Section -->
+        <section id="gotchas" class="section">
+            <div class="container">
+                <h2>Modbus Gotchas</h2>
+                <p class="section-intro">Common pitfalls and manufacturer-specific implementations that can cause confusion in RTU implementations.</p>
+                
+                <div class="gotcha-grid">
+                    <div class="gotcha-card">
+                        <div class="gotcha-icon">🔢</div>
+                        <h3>Decimal Number Representations</h3>
+                        <p class="gotcha-description">Different manufacturers represent decimal numbers in various ways, especially when negative values are involved. Here are the most common approaches in RTU devices:</p>
+                        
+                        <div class="representation-examples">
+                            <div class="representation-card">
+                                <h4>1. IEEE 754 32-bit Float</h4>
+                                <div class="format-info">
+                                    <p><strong>Registers Used:</strong> 2 (32-bit total) = 8 bytes transmitted</p>
+                                    <p><strong>Range:</strong> ±3.4 × 10³⁸ (very large numbers)</p>
+                                    <p><strong>How Sign is Determined:</strong> First bit of the 32-bit value (0 = positive, 1 = negative)</p>
+                                    <p><strong>Scaling:</strong> Built into the floating-point format - no external scale factor needed</p>
+                                    <p><strong>Used by:</strong> Modern RTU devices, energy meters, smart transmitters</p>
+                                </div>
+                                
+                                <table class="example-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Example Value</th>
+                                            <th>Register 1 (Hex)</th>
+                                            <th>Register 2 (Hex)</th>
+                                            <th>RTU Bytes Sent</th>
+                                            <th>Sign Bit</th>
+                                            <th>What Device Shows</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>-123.45</td>
+                                            <td>0xC2F6</td>
+                                            <td>0xE666</td>
+                                            <td>C2 F6 E6 66</td>
+                                            <td>1 (negative)</td>
+                                            <td>-123.45°C</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1234.56</td>
+                                            <td>0x449A</td>
+                                            <td>0x51EC</td>
+                                            <td>44 9A 51 EC</td>
+                                            <td>0 (positive)</td>
+                                            <td>1234.56 kW</td>
+                                        </tr>
+                                        <tr>
+                                            <td>-0.001</td>
+                                            <td>0xBA83</td>
+                                            <td>0x126F</td>
+                                            <td>BA 83 12 6F</td>
+                                            <td>1 (negative)</td>
+                                            <td>-0.001 bar</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="format-notes"><strong>RTU Notes:</strong> Bytes transmitted big-endian, but register order varies by manufacturer<br>
+                                <strong>Pros:</strong> Handles very large and very small numbers, standard format<br>
+                                <strong>Cons:</strong> Can have tiny rounding errors, requires 8 bytes over serial</p>
+                            </div>
+
+                            <div class="representation-card">
+                                <h4>2. Scaled Signed Integer</h4>
+                                <div class="format-info">
+                                    <p><strong>Registers Used:</strong> 1 (16-bit) = 2 bytes transmitted</p>
+                                    <p><strong>Range:</strong> -32,768 to +32,767 (before scaling)</p>
+                                    <p><strong>How Sign is Determined:</strong> If register value > 32,767 then it's negative (two's complement)</p>
+                                    <p><strong>How Scaling Works:</strong> Device stores (actual value × scale factor). To get real value: register value ÷ scale factor</p>
+                                    <p><strong>Used by:</strong> RTU temperature sensors, pressure transmitters, flow meters</p>
+                                </div>
+                                
+                                <table class="example-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Example Value</th>
+                                            <th>Scale Factor</th>
+                                            <th>Stored As<br>(value × scale)</th>
+                                            <th>Register Value (Hex)</th>
+                                            <th>RTU Bytes Sent</th>
+                                            <th>Sign Check</th>
+                                            <th>What Device Shows</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>-123.45</td>
+                                            <td>× 100</td>
+                                            <td>-12,345</td>
+                                            <td>0xCFC7</td>
+                                            <td>CF C7</td>
+                                            <td>53,191 > 32,767 = Negative</td>
+                                            <td>-123.45°C</td>
+                                        </tr>
+                                        <tr>
+                                            <td>25.6</td>
+                                            <td>× 10</td>
+                                            <td>256</td>
+                                            <td>0x0100</td>
+                                            <td>01 00</td>
+                                            <td>256 ≤ 32,767 = Positive</td>
+                                            <td>25.6°C</td>
+                                        </tr>
+                                        <tr>
+                                            <td>-50.25</td>
+                                            <td>× 100</td>
+                                            <td>-5,025</td>
+                                            <td>0xEC37</td>
+                                            <td>EC 37</td>
+                                            <td>60,471 > 32,767 = Negative</td>
+                                            <td>-50.25 psi</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="format-notes"><strong>RTU Notes:</strong> Scale factor usually documented in device manual<br>
+                                <strong>Pros:</strong> Exact decimal representation, efficient transmission, single register<br>
+                                <strong>Cons:</strong> Limited range, need to know scale factor from manual</p>
+                            </div>
+
+                            <div class="representation-card">
+                                <h4>3. Packed BCD (Binary Coded Decimal)</h4>
+                                <div class="format-info">
+                                    <p><strong>Registers Used:</strong> 2-4 (depends on precision needed) = 4-8 bytes transmitted</p>
+                                    <p><strong>Range:</strong> Varies, typically 4-8 decimal digits</p>
+                                    <p><strong>How Sign is Determined:</strong> Special nibble (4-bit) holds sign: 0-7 = positive, 8-F = negative</p>
+                                    <p><strong>How Scaling Works:</strong> Each nibble represents one decimal digit exactly - no math needed</p>
+                                    <p><strong>Used by:</strong> RTU flow meters, older industrial RTU devices</p>
+                                </div>
+                                
+                                <table class="example-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Example Value</th>
+                                            <th>Register 1 (Hex)</th>
+                                            <th>Register 2 (Hex)</th>
+                                            <th>RTU Bytes Sent</th>
+                                            <th>Sign Nibble</th>
+                                            <th>Digits</th>
+                                            <th>What Device Shows</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>-123.45</td>
+                                            <td>0x8123</td>
+                                            <td>0x4500</td>
+                                            <td>81 23 45 00</td>
+                                            <td>8 = Negative</td>
+                                            <td>1,2,3 . 4,5</td>
+                                            <td>-123.45 L/min</td>
+                                        </tr>
+                                        <tr>
+                                            <td>987.65</td>
+                                            <td>0x0987</td>
+                                            <td>0x6500</td>
+                                            <td>09 87 65 00</td>
+                                            <td>0 = Positive</td>
+                                            <td>9,8,7 . 6,5</td>
+                                            <td>987.65 gal</td>
+                                        </tr>
+                                        <tr>
+                                            <td>-0.12</td>
+                                            <td>0xF000</td>
+                                            <td>0x1200</td>
+                                            <td>F0 00 12 00</td>
+                                            <td>F = Negative</td>
+                                            <td>0,0,0 . 1,2</td>
+                                            <td>-0.12 mph</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="format-notes"><strong>RTU Notes:</strong> Some devices use 0xF for negative instead of 0x8<br>
+                                <strong>Pros:</strong> No rounding errors, human-readable in hex, each digit stored exactly<br>
+                                <strong>Cons:</strong> Inefficient transmission, more complex to parse</p>
+                            </div>
+
+                            <div class="representation-card">
+                                <h4>4. Offset Binary (Excess-K)</h4>
+                                <div class="format-info">
+                                    <p><strong>Registers Used:</strong> 1 (16-bit) = 2 bytes transmitted</p>
+                                    <p><strong>Range:</strong> Manufacturer specific (e.g., -200°C to +200°C)</p>
+                                    <p><strong>How Sign is Determined:</strong> No negative values stored! Offset makes all values positive</p>
+                                    <p><strong>How Scaling Works:</strong> (Register value ÷ scale factor) - offset = actual value</p>
+                                    <p><strong>Used by:</strong> RTU temperature controllers, level sensors</p>
+                                </div>
+                                
+                                <table class="example-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Example Value</th>
+                                            <th>Offset Used</th>
+                                            <th>Scale Factor</th>
+                                            <th>Calculation</th>
+                                            <th>Register Value (Hex)</th>
+                                            <th>RTU Bytes Sent</th>
+                                            <th>What Device Shows</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>-123.45°C</td>
+                                            <td>+200</td>
+                                            <td>× 100</td>
+                                            <td>(-123.45 + 200) × 100 = 7,655</td>
+                                            <td>0x1DE7</td>
+                                            <td>1D E7</td>
+                                            <td>-123.45°C</td>
+                                        </tr>
+                                        <tr>
+                                            <td>75.2°C</td>
+                                            <td>+200</td>
+                                            <td>× 100</td>
+                                            <td>(75.2 + 200) × 100 = 27,520</td>
+                                            <td>0x6B74</td>
+                                            <td>6B 74</td>
+                                            <td>75.2°C</td>
+                                        </tr>
+                                        <tr>
+                                            <td>-50.0 psi</td>
+                                            <td>+100</td>
+                                            <td>× 10</td>
+                                            <td>(-50 + 100) × 10 = 500</td>
+                                            <td>0x01F4</td>
+                                            <td>01 F4</td>
+                                            <td>-50.0 psi</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="format-notes"><strong>RTU Notes:</strong> Offset values vary by manufacturer and measurement range<br>
+                                <strong>Pros:</strong> Avoids negative numbers completely, simple for device firmware<br>
+                                <strong>Cons:</strong> Need to know offset value from manual, not intuitive</p>
+                            </div>
+
+                            <div class="representation-card">
+                                <h4>5. ASCII over RTU (Rarely Used)</h4>
+                                <div class="format-info">
+                                    <p><strong>Registers Used:</strong> 3-6 (depends on number length) = 6-12 bytes transmitted</p>
+                                    <p><strong>Range:</strong> Flexible, limited by register count</p>
+                                    <p><strong>How Sign is Determined:</strong> ASCII minus character "-" (0x2D) as first character</p>
+                                    <p><strong>How Scaling Works:</strong> No scaling - decimal point "." (0x2E) stored as character</p>
+                                    <p><strong>Used by:</strong> Some display meters, legacy RTU devices</p>
+                                </div>
+                                
+                                <table class="example-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Example Value</th>
+                                            <th>Register 1</th>
+                                            <th>Register 2</th>
+                                            <th>Register 3</th>
+                                            <th>RTU Bytes Sent</th>
+                                            <th>Sign Character</th>
+                                            <th>What Device Shows</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>-123.45</td>
+                                            <td>0x2D31 ("-1")</td>
+                                            <td>0x3233 ("23")</td>
+                                            <td>0x2E34 (".4")</td>
+                                            <td>2D 31 32 33 2E 34</td>
+                                            <td>0x2D = "-"</td>
+                                            <td>-123.45</td>
+                                        </tr>
+                                        <tr>
+                                            <td>56.78</td>
+                                            <td>0x3536 ("56")</td>
+                                            <td>0x2E37 (".7")</td>
+                                            <td>0x3800 ("8\0")</td>
+                                            <td>35 36 2E 37 38 00</td>
+                                            <td>No sign = "+"</td>
+                                            <td>56.78</td>
+                                        </tr>
+                                        <tr>
+                                            <td>-9.1</td>
+                                            <td>0x2D39 ("-9")</td>
+                                            <td>0x2E31 (".1")</td>
+                                            <td>0x0000</td>
+                                            <td>2D 39 2E 31 00 00</td>
+                                            <td>0x2D = "-"</td>
+                                            <td>-9.1</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="format-notes"><strong>RTU Notes:</strong> Inefficient for RTU bandwidth, rarely used in practice<br>
+                                <strong>Pros:</strong> Human readable, flexible precision, exactly what you see<br>
+                                <strong>Cons:</strong> Very inefficient transmission, uses many bytes, slow over serial</p>
+                            </div>
+                        </div>
+
+                        <div class="gotcha-tips">
+                            <h4>💡 RTU-Specific Tips for Decimal Handling</h4>
+                            <ul>
+                                <li><strong>Check device manuals:</strong> RTU devices often have unique scaling documented</li>
+                                <li><strong>Monitor raw bytes:</strong> Use RTU sniffers to see actual byte transmission</li>
+                                <li><strong>Test edge cases:</strong> Try zero, positive/negative extremes</li>
+                                <li><strong>Byte order matters:</strong> RTU uses big-endian, but register order varies</li>
+                                <li><strong>Validate with known readings:</strong> Use physical measurements to verify parsing</li>
+                                <li><strong>Consider update rates:</strong> Some RTU devices use different formats for fast vs. slow registers</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz Section -->
+        <section id="quiz" class="section">
+            <div class="container">
+                <h2>Modbus RTU Quick Quiz</h2>
+                
+                <div class="quiz-container" id="quiz-container">
+                    <div class="quiz-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <span class="progress-text" id="progressText">Question 1 of 15</span>
+                    </div>
+                    
+                    <div class="question-container" id="questionContainer">
+                        <!-- Questions will be dynamically loaded here -->
+                    </div>
+                    
+                    <div class="quiz-controls">
+                        <button id="prevBtn" class="quiz-btn" onclick="previousQuestion()" disabled>Previous</button>
+                        <button id="nextBtn" class="quiz-btn" onclick="nextQuestion()">Next</button>
+                        <button id="submitBtn" class="quiz-btn submit-btn" onclick="submitQuiz()" style="display: none;">Submit Quiz</button>
+                    </div>
+                    
+                    <div class="quiz-results" id="quizResults" style="display: none;">
+                        <h3>Quiz Results</h3>
+                        <div class="score-display" id="scoreDisplay"></div>
+                        <div class="answers-review" id="answersReview"></div>
+                        <button id="retakeBtn" class="quiz-btn" onclick="retakeQuiz()">Retake Quiz</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Modbus RTU Introduction Guide. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="modbus-rtu-script.js"></script>
+</body>
+</html>

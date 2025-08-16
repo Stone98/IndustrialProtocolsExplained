@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modbus TCP Introduction</title>
+    <link rel="stylesheet" href="modbus-tcp-styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1 class="nav-logo"><a href="#introduction" class="logo-link">Modbus TCP Guide</a></h1>
+            <ul class="nav-menu">
+                <li><a href="#introduction" class="nav-link">Introduction</a></li>
+                <li><a href="#api" class="nav-link">API</a></li>
+                <li><a href="#terms" class="nav-link">Terms</a></li>
+                <li><a href="#examples" class="nav-link">Examples</a></li>
+                <li><a href="#client" class="nav-link">Client</a></li>
+                <li><a href="#server" class="nav-link">Server</a></li>
+                <li><a href="#gotchas" class="nav-link">Gotchas</a></li>
+                <li><a href="#quiz" class="nav-link">Quiz</a></li>
+                <li><a href="../modbus-rtu/modbus-rtu-index.html" class="nav-link external-link" onclick="navigateToRTU(event)">RTU Guide</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Introduction Section -->
+        <section id="introduction" class="section">
+            <div class="container">
+                <h2>Introduction to Modbus TCP</h2>
+                <div class="intro-content">
+                    <div class="intro-text">
+                        <p>Modbus TCP is a communication protocol used in industrial automation systems to enable communication between devices over Ethernet networks. It's an adaptation of the traditional Modbus protocol for TCP/IP networks.</p>
+                        
+                        <h3>What is Modbus?</h3>
+                        <p>Modbus is a serial communication protocol developed by Modicon (now Schneider Electric) in 1979. It has become a de facto standard communication protocol in the industrial manufacturing environment.</p>
+                        
+                        <h3>Key Features of Modbus TCP</h3>
+                        <ul>
+                            <li><strong>Open Protocol:</strong> Free to use without licensing fees</li>
+                            <li><strong>Simple:</strong> Easy to implement and understand</li>
+                            <li><strong>Ethernet-based:</strong> Runs over standard TCP/IP networks</li>
+                            <li><strong>Master-Slave Architecture:</strong> Clear communication hierarchy</li>
+                            <li><strong>Port 502:</strong> Uses standard port 502 for communication</li>
+                        </ul>
+                        
+                        <h3>How Modbus TCP Works</h3>
+                        <p>Modbus TCP follows a client-server model where:</p>
+                        <ul>
+                            <li><strong>Client (Master):</strong> Initiates requests for data</li>
+                            <li><strong>Server (Slave):</strong> Responds to client requests</li>
+                            <li><strong>Data Model:</strong> Uses four primary data types (coils, discrete inputs, holding registers, input registers)</li>
+                        </ul>
+                    </div>
+                    <div class="intro-diagram">
+                        <div class="modbus-diagram">
+                            <div class="client-box">
+                                <h4>Modbus Client</h4>
+                                <p>Sends requests</p>
+                            </div>
+                            <div class="arrow">→</div>
+                            <div class="server-box">
+                                <h4>Modbus Server</h4>
+                                <p>Processes & responds</p>
+                            </div>
+                        </div>
+                        
+                        <div class="practical-example">
+                            <h4>Practical Example: Temperature Monitoring</h4>
+                            <div class="example-diagram">
+                                <div class="device display-unit">
+                                    <div class="device-header">
+                                        <h5>HMI Display Unit</h5>
+                                        <small>(Modbus Client - IP: 192.168.1.50)</small>
+                                    </div>
+                                    <div class="device-content">
+                                        <div class="display-screen">
+                                            <div class="screen-header">Temperature Monitor</div>
+                                            <div class="screen-content">
+                                                <div class="displayed-temp">
+                                                    <span class="display-label">Current Temperature:</span>
+                                                    <span class="display-value">23.5°C</span>
+                                                </div>
+                                                <div class="status-indicator">
+                                                    <span class="status-dot online"></span>
+                                                    <span>Online</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="communication-flow">
+                                    <div class="communication-step">
+                                        <div class="step-number">1</div>
+                                        <div class="step-description">
+                                            <strong>Request:</strong> Read Temperature<br>
+                                            <span class="message-details">Function: 04, Register: 30001</span>
+                                        </div>
+                                        <div class="flow-arrow">→</div>
+                                    </div>
+                                    
+                                    <div class="communication-step">
+                                        <div class="step-number">2</div>
+                                        <div class="step-description">
+                                            <strong>Response:</strong> Temperature Data<br>
+                                            <span class="message-details">Value: 2350 (23.5°C)</span>
+                                        </div>
+                                        <div class="flow-arrow">←</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="device temperature-sensor">
+                                    <div class="device-header">
+                                        <h5>Temperature Sensor Unit</h5>
+                                        <small>(Modbus Server - IP: 192.168.1.100)</small>
+                                    </div>
+                                    <div class="device-content">
+                                        <div class="sensor-reading">
+                                            <span class="temp-icon">🌡️</span>
+                                            <span class="temp-value">23.5°C</span>
+                                        </div>
+                                        <div class="register-info">
+                                            <strong>Register 30001:</strong> 2350<br>
+                                            <small>(Temperature × 100)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="example-explanation">
+                                <h5>How it Works:</h5>
+                                <ol>
+                                    <li><strong>Temperature Measurement:</strong> The sensor continuously measures temperature (23.5°C)</li>
+                                    <li><strong>Data Storage:</strong> Value is stored in Input Register 30001 as integer 2350 (temp × 100)</li>
+                                    <li><strong>Client Request:</strong> HMI Display Unit sends Modbus request to read the temperature register</li>
+                                    <li><strong>Server Response:</strong> Temperature Sensor Unit responds with raw value 2350</li>
+                                    <li><strong>Data Processing:</strong> HMI divides by 100 to get 23.5°C</li>
+                                    <li><strong>Display Update:</strong> Temperature is shown on HMI screen for operator viewing</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- API Section -->
+        <section id="api" class="section">
+            <div class="container">
+                <h2>Modbus TCP API Reference</h2>
+                
+                <div class="api-overview">
+                    <h3>Function Codes</h3>
+                    <p>Modbus TCP uses function codes to define the type of operation being performed:</p>
+                </div>
+
+                <div class="function-codes">
+                    <div class="function-card">
+                        <h4>01 - Read Coils</h4>
+                        <p>Read status of discrete outputs (coils)</p>
+                        <div class="code-example">
+                            <strong>Request:</strong> Unit ID + Function Code + Starting Address + Quantity
+                        </div>
+                    </div>
+                    
+                    <div class="function-card">
+                        <h4>02 - Read Discrete Inputs</h4>
+                        <p>Read status of discrete inputs</p>
+                        <div class="code-example">
+                            <strong>Request:</strong> Unit ID + Function Code + Starting Address + Quantity
+                        </div>
+                    </div>
+                    
+                    <div class="function-card">
+                        <h4>03 - Read Holding Registers</h4>
+                        <p>Read values from holding registers</p>
+                        <div class="code-example">
+                            <strong>Request:</strong> Unit ID + Function Code + Starting Address + Quantity
+                        </div>
+                    </div>
+                    
+                    <div class="function-card">
+                        <h4>04 - Read Input Registers</h4>
+                        <p>Read values from input registers</p>
+                        <div class="code-example">
+                            <strong>Request:</strong> Unit ID + Function Code + Starting Address + Quantity
+                        </div>
+                    </div>
+                    
+                    <div class="function-card">
+                        <h4>05 - Write Single Coil</h4>
+                        <p>Write a single coil (discrete output)</p>
+                        <div class="code-example">
+                            <strong>Request:</strong> Unit ID + Function Code + Address + Value
+                        </div>
+                    </div>
+                    
+                    <div class="function-card">
+                        <h4>06 - Write Single Register</h4>
+                        <p>Write a single holding register</p>
+                        <div class="code-example">
+                            <strong>Request:</strong> Unit ID + Function Code + Address + Value
+                        </div>
+                    </div>
+                </div>
+
+                <div class="message-format">
+                    <h3>Message Format</h3>
+                    <div class="format-diagram">
+                        <div class="format-header">
+                            <h4>Modbus TCP/IP ADU (Application Data Unit)</h4>
+                        </div>
+                        <div class="format-fields">
+                            <div class="field">
+                                <strong>Transaction ID</strong><br>
+                                <small>2 bytes</small>
+                            </div>
+                            <div class="field">
+                                <strong>Protocol ID</strong><br>
+                                <small>2 bytes (0x0000)</small>
+                            </div>
+                            <div class="field">
+                                <strong>Length</strong><br>
+                                <small>2 bytes</small>
+                            </div>
+                            <div class="field">
+                                <strong>Unit ID</strong><br>
+                                <small>1 byte</small>
+                            </div>
+                            <div class="field">
+                                <strong>Function Code</strong><br>
+                                <small>1 byte</small>
+                            </div>
+                            <div class="field">
+                                <strong>Data</strong><br>
+                                <small>N bytes</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Terms Section -->
+        <section id="terms" class="section">
+            <div class="container">
+                <h2>Modbus TCP Terminology</h2>
+                
+                <div class="terms-intro">
+                    <p>Understanding Modbus terminology is essential for effective implementation. Here are the key concepts and data types you'll encounter when working with Modbus TCP.</p>
+                </div>
+
+                <div class="terms-grid">
+                    <div class="term-card">
+                        <h3>Coils</h3>
+                        <div class="term-details">
+                            <div class="term-description">
+                                <p><strong>Definition:</strong> 1-bit read/write discrete values that represent binary outputs or flags.</p>
+                                <p><strong>Common Uses:</strong></p>
+                                <ul>
+                                    <li>Digital outputs (relay states, valve positions)</li>
+                                    <li>Control flags (start/stop commands)</li>
+                                    <li>Status indicators (alarm conditions)</li>
+                                    <li>Boolean configuration settings</li>
+                                </ul>
+                                <p><strong>Address Range:</strong> 00001 - 09999 (traditional addressing)</p>
+                                <p><strong>Function Codes:</strong> 01 (Read), 05 (Write Single), 15 (Write Multiple)</p>
+                            </div>
+                            <div class="term-example">
+                                <h4>Example:</h4>
+                                <code>Coil 00001 = 1 (Motor Running)<br>
+                                Coil 00002 = 0 (Pump Stopped)</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Discrete Inputs</h3>
+                        <div class="term-details">
+                            <div class="term-description">
+                                <p><strong>Definition:</strong> 1-bit read-only discrete values that represent binary inputs from sensors or switches.</p>
+                                <p><strong>Common Uses:</strong></p>
+                                <ul>
+                                    <li>Digital sensors (proximity switches, limit switches)</li>
+                                    <li>Push button states</li>
+                                    <li>Safety interlocks</li>
+                                    <li>Equipment status feedback</li>
+                                </ul>
+                                <p><strong>Address Range:</strong> 10001 - 19999 (traditional addressing)</p>
+                                <p><strong>Function Codes:</strong> 02 (Read only)</p>
+                            </div>
+                            <div class="term-example">
+                                <h4>Example:</h4>
+                                <code>Input 10001 = 1 (Door Open)<br>
+                                Input 10002 = 0 (Emergency Stop Not Pressed)</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Holding Registers</h3>
+                        <div class="term-details">
+                            <div class="term-description">
+                                <p><strong>Definition:</strong> 16-bit read/write values used for analog outputs, setpoints, and configuration data.</p>
+                                <p><strong>Common Uses:</strong></p>
+                                <ul>
+                                    <li>Analog outputs (speed setpoints, position commands)</li>
+                                    <li>Configuration parameters</li>
+                                    <li>Control setpoints and limits</li>
+                                    <li>Writable process variables</li>
+                                </ul>
+                                <p><strong>Address Range:</strong> 40001 - 49999 (traditional addressing)</p>
+                                <p><strong>Function Codes:</strong> 03 (Read), 06 (Write Single), 16 (Write Multiple)</p>
+                                <p><strong>Value Range:</strong> 0 - 65535 (unsigned) or -32768 to 32767 (signed)</p>
+                            </div>
+                            <div class="term-example">
+                                <h4>Example:</h4>
+                                <code>Register 40001 = 1500 (Motor Speed RPM)<br>
+                                Register 40002 = 250 (Temperature Setpoint °C)</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Input Registers</h3>
+                        <div class="term-details">
+                            <div class="term-description">
+                                <p><strong>Definition:</strong> 16-bit read-only values representing analog inputs and measured process variables.</p>
+                                <p><strong>Common Uses:</strong></p>
+                                <ul>
+                                    <li>Analog sensor readings (temperature, pressure, flow)</li>
+                                    <li>Measured process variables</li>
+                                    <li>System status values</li>
+                                    <li>Calculated measurements</li>
+                                </ul>
+                                <p><strong>Address Range:</strong> 30001 - 39999 (traditional addressing)</p>
+                                <p><strong>Function Codes:</strong> 04 (Read only)</p>
+                                <p><strong>Value Range:</strong> 0 - 65535 (unsigned) or -32768 to 32767 (signed)</p>
+                            </div>
+                            <div class="term-example">
+                                <h4>Example:</h4>
+                                <code>Register 30001 = 2350 (Current Temperature × 10)<br>
+                                Register 30002 = 1024 (Pressure in PSI)</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Unit ID (Slave ID)</h3>
+                        <div class="term-details">
+                            <div class="term-description">
+                                <p><strong>Definition:</strong> An 8-bit identifier that specifies which device should respond to a request in multi-device networks.</p>
+                                <p><strong>Details:</strong></p>
+                                <ul>
+                                    <li>Range: 1-247 for device addressing</li>
+                                    <li>0 = Broadcast (not typically used in TCP)</li>
+                                    <li>248-255 = Reserved</li>
+                                    <li>Each device must have a unique Unit ID</li>
+                                </ul>
+                            </div>
+                            <div class="term-example">
+                                <h4>Example:</h4>
+                                <code>Unit ID 1 = PLC Controller<br>
+                                Unit ID 2 = Temperature Monitor</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Function Code</h3>
+                        <div class="term-details">
+                            <div class="term-description">
+                                <p><strong>Definition:</strong> An 8-bit code that specifies the type of operation to be performed.</p>
+                                <p><strong>Common Function Codes:</strong></p>
+                                <ul>
+                                    <li>01-04: Read operations</li>
+                                    <li>05-06: Write single operations</li>
+                                    <li>15-16: Write multiple operations</li>
+                                    <li>128+: Exception responses</li>
+                                </ul>
+                            </div>
+                            <div class="term-example">
+                                <h4>Example:</h4>
+                                <code>Function Code 03 = Read Holding Registers<br>
+                                Function Code 131 = Exception Response (128+3)</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Transaction ID</h3>
+                        <div class="term-details">
+                            <div class="term-description">
+                                <p><strong>Definition:</strong> A 16-bit identifier used to match requests with responses in Modbus TCP.</p>
+                                <p><strong>Purpose:</strong></p>
+                                <ul>
+                                    <li>Associates responses with their corresponding requests</li>
+                                    <li>Enables concurrent request handling</li>
+                                    <li>Typically incremented for each new request</li>
+                                    <li>Echo'd back unchanged in the response</li>
+                                </ul>
+                            </div>
+                            <div class="term-example">
+                                <h4>Example:</h4>
+                                <code>Request: Transaction ID = 0x0001<br>
+                                Response: Transaction ID = 0x0001</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="term-card">
+                        <h3>Exception Codes</h3>
+                        <div class="term-details">
+                            <div class="term-description">
+                                <p><strong>Definition:</strong> Error codes returned when a Modbus request cannot be processed normally.</p>
+                                <p><strong>Common Exception Codes:</strong></p>
+                                <ul>
+                                    <li>01: Illegal Function - Unsupported function code</li>
+                                    <li>02: Illegal Data Address - Invalid register address</li>
+                                    <li>03: Illegal Data Value - Invalid data in request</li>
+                                    <li>04: Slave Device Failure - Device processing error</li>
+                                </ul>
+                            </div>
+                            <div class="term-example">
+                                <h4>Example:</h4>
+                                <code>Exception Response:<br>
+                                Function Code = 131 (128 + 03)<br>
+                                Exception Code = 02 (Illegal Address)</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="addressing-explanation">
+                    <h3>Address Formats & Configuration Challenges</h3>
+                    <div class="addressing-cards">
+                        <div class="addressing-card">
+                            <h4>Traditional 5-Digit Addressing</h4>
+                            <p>Legacy addressing system where the first digit indicates data type:</p>
+                            <ul>
+                                <li><strong>0xxxx:</strong> Coils (00001-09999)</li>
+                                <li><strong>1xxxx:</strong> Discrete Inputs (10001-19999)</li>
+                                <li><strong>3xxxx:</strong> Input Registers (30001-39999)</li>
+                                <li><strong>4xxxx:</strong> Holding Registers (40001-49999)</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="addressing-card">
+                            <h4>Modern Protocol Data Unit (PDU) Addressing</h4>
+                            <p>Direct register addressing used in actual protocol messages:</p>
+                            <ul>
+                                <li><strong>0-based indexing:</strong> Address 0 = first register</li>
+                                <li><strong>Function code defines type:</strong> No prefix needed</li>
+                                <li><strong>Example:</strong> Traditional 40001 = PDU address 0</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="addressing-card manufacturer-differences">
+                            <h4>⚠️ Manufacturer Addressing Differences</h4>
+                            <p><strong>Critical Configuration Challenge:</strong> Different manufacturers use different addressing conventions:</p>
+                            <ul>
+                                <li><strong>0-Based Manufacturers:</strong> First register = address 0</li>
+                                <li><strong>1-Based Manufacturers:</strong> First register = address 1</li>
+                                <li><strong>Traditional Offset:</strong> Some subtract 1 from 5-digit addresses</li>
+                                <li><strong>Direct Mapping:</strong> Others use 5-digit addresses directly</li>
+                            </ul>
+                            <div class="warning-box">
+                                <strong>Impact:</strong> Same logical register may have different addresses depending on manufacturer documentation and implementation!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-format-challenges">
+                    <h3>Data Format & Encoding Challenges</h3>
+                    
+                    <div class="format-cards">
+                        <div class="format-card">
+                            <h4>🔄 Byte Order (Endianness)</h4>
+                            <div class="endian-explanation">
+                                <p><strong>Problem:</strong> 16-bit and 32-bit values can be stored in different byte orders:</p>
+                                
+                                <div class="endian-examples">
+                                    <div class="endian-example">
+                                        <h5>Big-Endian (Motorola/Network Order)</h5>
+                                        <p>Most significant byte first</p>
+                                        <div class="byte-order">
+                                            <span class="byte">0x12</span><span class="byte">0x34</span>
+                                        </div>
+                                        <p class="value">Value: 0x1234 = 4660 decimal</p>
+                                    </div>
+                                    
+                                    <div class="endian-example">
+                                        <h5>Little-Endian (Intel Order)</h5>
+                                        <p>Least significant byte first</p>
+                                        <div class="byte-order">
+                                            <span class="byte">0x34</span><span class="byte">0x12</span>
+                                        </div>
+                                        <p class="value">Value: 0x3412 = 13330 decimal</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="multi-register">
+                                    <h5>32-bit Values Across Two Registers</h5>
+                                    <p>Four possible combinations for value 0x12345678:</p>
+                                    <ul>
+                                        <li><strong>Big-Endian, High-Low:</strong> [0x1234][0x5678]</li>
+                                        <li><strong>Little-Endian, High-Low:</strong> [0x3412][0x7856]</li>
+                                        <li><strong>Big-Endian, Low-High:</strong> [0x5678][0x1234]</li>
+                                        <li><strong>Little-Endian, Low-High:</strong> [0x7856][0x3412]</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="format-card">
+                            <h4>📝 String Encoding Challenges</h4>
+                            <div class="string-explanation">
+                                <p><strong>Problem:</strong> Text data stored in registers can use various encoding methods:</p>
+                                
+                                <div class="encoding-types">
+                                    <div class="encoding-type">
+                                        <h5>ASCII Encoding</h5>
+                                        <p>Standard 7-bit character encoding (most common)</p>
+                                        <div class="encoding-example">
+                                            <strong>Example:</strong> "AB" in one register<br>
+                                            <span class="register-value">Register: 0x4142 ('A'=0x41, 'B'=0x42)</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="encoding-type">
+                                        <h5>UTF-8 Encoding</h5>
+                                        <p>Variable-length encoding for international characters</p>
+                                        <div class="encoding-example">
+                                            <strong>Challenge:</strong> Multi-byte characters may span registers
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="encoding-type">
+                                        <h5>Manufacturer-Specific Encoding</h5>
+                                        <p>Some use proprietary character sets or packing methods</p>
+                                        <div class="encoding-example">
+                                            <strong>Examples:</strong>
+                                            <ul>
+                                                <li>BCD (Binary Coded Decimal) for numeric strings</li>
+                                                <li>Custom character mappings</li>
+                                                <li>Null-terminated vs fixed-length strings</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="string-ordering">
+                                    <h5>String Character Ordering</h5>
+                                    <p>Different manufacturers pack characters differently:</p>
+                                    <div class="packing-examples">
+                                        <div class="packing-example">
+                                            <strong>High-byte first:</strong> "AB" → 0x4142
+                                        </div>
+                                        <div class="packing-example">
+                                            <strong>Low-byte first:</strong> "AB" → 0x4241
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="configuration-challenges">
+                    <h3>⚠️ Initial Configuration Challenges</h3>
+                    
+                    <div class="challenge-cards">
+                        <div class="challenge-card">
+                            <h4>1. Address Mapping Issues</h4>
+                            <div class="challenge-content">
+                                <p><strong>Symptom:</strong> Reading wrong registers or getting "illegal address" errors</p>
+                                <p><strong>Causes:</strong></p>
+                                <ul>
+                                    <li>Mixing 0-based and 1-based addressing</li>
+                                    <li>Incorrect offset calculations</li>
+                                    <li>Misunderstanding manufacturer documentation</li>
+                                </ul>
+                                <p><strong>Solution:</strong> Always verify with simple test reads and confirm with device documentation</p>
+                            </div>
+                        </div>
+                        
+                        <div class="challenge-card">
+                            <h4>2. Data Interpretation Problems</h4>
+                            <div class="challenge-content">
+                                <p><strong>Symptom:</strong> Numeric values appear incorrect or text is garbled</p>
+                                <p><strong>Causes:</strong></p>
+                                <ul>
+                                    <li>Wrong endianness assumption</li>
+                                    <li>Incorrect string encoding</li>
+                                    <li>Multi-register value ordering</li>
+                                </ul>
+                                <p><strong>Solution:</strong> Test with known values and try different byte order combinations</p>
+                            </div>
+                        </div>
+                        
+                        <div class="challenge-card">
+                            <h4>3. Mixed Vendor Environments</h4>
+                            <div class="challenge-content">
+                                <p><strong>Symptom:</strong> Some devices work perfectly while others don't</p>
+                                <p><strong>Causes:</strong></p>
+                                <ul>
+                                    <li>Different manufacturers use different conventions</li>
+                                    <li>Legacy vs modern implementations</li>
+                                    <li>Firmware version differences</li>
+                                </ul>
+                                <p><strong>Solution:</strong> Create device-specific configuration profiles</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="best-practices-config">
+                        <h4>Configuration Best Practices</h4>
+                        <div class="practices-grid">
+                            <div class="practice-item">
+                                <h5>📋 Documentation Review</h5>
+                                <ul>
+                                    <li>Always check manufacturer's Modbus implementation guide</li>
+                                    <li>Look for addressing convention explanations</li>
+                                    <li>Note any special data format requirements</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="practice-item">
+                                <h5>🧪 Test with Known Values</h5>
+                                <ul>
+                                    <li>Start with simple single register reads</li>
+                                    <li>Use manufacturer's diagnostic tools if available</li>
+                                    <li>Test with registers containing known static values</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="practice-item">
+                                <h5>📝 Document Your Findings</h5>
+                                <ul>
+                                    <li>Record working address mappings</li>
+                                    <li>Note byte order requirements</li>
+                                    <li>Create device-specific configuration templates</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="practice-item">
+                                <h5>🔧 Configurable Libraries</h5>
+                                <ul>
+                                    <li>Use Modbus libraries that support multiple addressing modes</li>
+                                    <li>Implement configurable byte order handling</li>
+                                    <li>Build abstraction layers for different vendors</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-types-summary">
+                    <h3>Quick Reference Table</h3>
+                    <div class="reference-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data Type</th>
+                                    <th>Size</th>
+                                    <th>Access</th>
+                                    <th>Traditional Range</th>
+                                    <th>Read Function</th>
+                                    <th>Write Function</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Coils</td>
+                                    <td>1 bit</td>
+                                    <td>Read/Write</td>
+                                    <td>00001-09999</td>
+                                    <td>01</td>
+                                    <td>05, 15</td>
+                                </tr>
+                                <tr>
+                                    <td>Discrete Inputs</td>
+                                    <td>1 bit</td>
+                                    <td>Read Only</td>
+                                    <td>10001-19999</td>
+                                    <td>02</td>
+                                    <td>N/A</td>
+                                </tr>
+                                <tr>
+                                    <td>Input Registers</td>
+                                    <td>16 bit</td>
+                                    <td>Read Only</td>
+                                    <td>30001-39999</td>
+                                    <td>04</td>
+                                    <td>N/A</td>
+                                </tr>
+                                <tr>
+                                    <td>Holding Registers</td>
+                                    <td>16 bit</td>
+                                    <td>Read/Write</td>
+                                    <td>40001-49999</td>
+                                    <td>03</td>
+                                    <td>06, 16</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Examples Section -->
+        <section id="examples" class="section">
+            <div class="container">
+                <h2>Practical Examples</h2>
+                
+                <div class="examples-grid">
+                    <div class="example-card">
+                        <h3>Python Client Example</h3>
+                        <pre><code class="language-python">from pymodbus.client.sync import ModbusTcpClient
+
+# Create client connection
+client = ModbusTcpClient('192.168.1.100', port=502)
+
+# Connect to server
+connection = client.connect()
+if connection:
+    print("Connected to Modbus server")
+    
+    # Read holding registers
+    result = client.read_holding_registers(0, 10, unit=1)
+    if result.isError():
+        print("Error reading registers")
+    else:
+        print(f"Register values: {result.registers}")
+    
+    # Write single register
+    client.write_register(0, 1234, unit=1)
+    
+    # Close connection
+    client.close()
+else:
+    print("Failed to connect")</code></pre>
+                    </div>
+                    
+                    <div class="example-card">
+                        <h3>JavaScript Client Example</h3>
+                        <pre><code class="language-javascript">const ModbusRTU = require("modbus-serial");
+const client = new ModbusRTU();
+
+async function modbusExample() {
+    try {
+        // Connect to Modbus TCP server
+        await client.connectTCP("192.168.1.100", { port: 502 });
+        client.setID(1);
+        
+        console.log("Connected to Modbus server");
+        
+        // Read holding registers
+        const data = await client.readHoldingRegisters(0, 10);
+        console.log("Register values:", data.data);
+        
+        // Write single register
+        await client.writeRegister(0, 5678);
+        console.log("Register written successfully");
+        
+        client.close();
+    } catch (error) {
+        console.error("Modbus error:", error);
+    }
+}
+
+modbusExample();</code></pre>
+                    </div>
+                    
+                    <div class="example-card">
+                        <h3>C# Client Example</h3>
+                        <pre><code class="language-csharp">using EasyModbus;
+
+class Program
+{
+    static void Main()
+    {
+        ModbusClient modbusClient = new ModbusClient("192.168.1.100", 502);
+        
+        try
+        {
+            modbusClient.Connect();
+            Console.WriteLine("Connected to Modbus server");
+            
+            // Read holding registers
+            int[] readData = modbusClient.ReadHoldingRegisters(0, 10);
+            Console.WriteLine($"First register value: {readData[0]}");
+            
+            // Write single register
+            modbusClient.WriteSingleRegister(0, 9999);
+            Console.WriteLine("Register written successfully");
+            
+            modbusClient.Disconnect();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Client Section -->
+        <section id="client" class="section">
+            <div class="container">
+                <h2>Modbus TCP Client Development</h2>
+                
+                <div class="client-content">
+                    <h3>Client Responsibilities</h3>
+                    <ul>
+                        <li>Initiate TCP connections to Modbus servers</li>
+                        <li>Format and send Modbus requests</li>
+                        <li>Handle server responses and errors</li>
+                        <li>Manage connection lifecycle</li>
+                    </ul>
+                    
+                    <h3>Implementation Steps</h3>
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-number">1</div>
+                            <div class="step-content">
+                                <h4>Establish TCP Connection</h4>
+                                <p>Connect to the server on port 502 (default Modbus TCP port)</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">2</div>
+                            <div class="step-content">
+                                <h4>Format Request Message</h4>
+                                <p>Create properly formatted Modbus TCP ADU with transaction ID, protocol ID, length, unit ID, function code, and data</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">3</div>
+                            <div class="step-content">
+                                <h4>Send Request</h4>
+                                <p>Transmit the formatted message to the server</p>
+                            </div>
+                        </div>
+                        
+                        <div class="step">
+                            <div class="step-number">4</div>
+                            <div class="step-content">
+                                <h4>Receive and Parse Response</h4>
+                                <p>Wait for server response and parse the returned data</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>Best Practices</h3>
+                    <div class="best-practices">
+                        <div class="practice">
+                            <h4>Connection Management</h4>
+                            <ul>
+                                <li>Implement connection pooling for multiple requests</li>
+                                <li>Handle connection timeouts gracefully</li>
+                                <li>Implement reconnection logic for lost connections</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="practice">
+                            <h4>Error Handling</h4>
+                            <ul>
+                                <li>Check for Modbus exception responses</li>
+                                <li>Validate response message format</li>
+                                <li>Implement retry mechanisms for failed requests</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="practice">
+                            <h4>Performance</h4>
+                            <ul>
+                                <li>Use persistent connections when possible</li>
+                                <li>Implement request queuing for high-throughput scenarios</li>
+                                <li>Consider async/await patterns for non-blocking operations</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Server Section -->
+        <section id="server" class="section">
+            <div class="container">
+                <h2>Modbus TCP Server Development</h2>
+                
+                <div class="server-content">
+                    <h3>Server Responsibilities</h3>
+                    <ul>
+                        <li>Listen for incoming TCP connections on port 502</li>
+                        <li>Parse and validate incoming Modbus requests</li>
+                        <li>Process requests and access data model</li>
+                        <li>Format and send appropriate responses</li>
+                    </ul>
+                    
+                    <h3>Data Model</h3>
+                    <div class="data-model">
+                        <div class="data-type">
+                            <h4>Coils (Discrete Outputs)</h4>
+                            <p>1-bit read/write values, typically representing digital outputs</p>
+                            <div class="address-range">Address Range: 00001 - 09999</div>
+                        </div>
+                        
+                        <div class="data-type">
+                            <h4>Discrete Inputs</h4>
+                            <p>1-bit read-only values, typically representing digital inputs</p>
+                            <div class="address-range">Address Range: 10001 - 19999</div>
+                        </div>
+                        
+                        <div class="data-type">
+                            <h4>Input Registers</h4>
+                            <p>16-bit read-only values, typically representing analog inputs</p>
+                            <div class="address-range">Address Range: 30001 - 39999</div>
+                        </div>
+                        
+                        <div class="data-type">
+                            <h4>Holding Registers</h4>
+                            <p>16-bit read/write values, typically representing analog outputs or configuration</p>
+                            <div class="address-range">Address Range: 40001 - 49999</div>
+                        </div>
+                    </div>
+                    
+                    <h3>Simple Server Example (Python)</h3>
+                    <pre><code class="language-python">from pymodbus.server.sync import StartTcpServer
+from pymodbus.device import ModbusDeviceIdentification
+from pymodbus.datastore import ModbusSequentialDataBlock
+from pymodbus.datastore import ModbusSlaveContext, ModbusServerContext
+
+# Create data blocks
+store = ModbusSlaveContext(
+    di=ModbusSequentialDataBlock(0, [0]*100),  # Discrete Inputs
+    co=ModbusSequentialDataBlock(0, [0]*100),  # Coils
+    hr=ModbusSequentialDataBlock(0, [0]*100),  # Holding Registers
+    ir=ModbusSequentialDataBlock(0, [0]*100)   # Input Registers
+)
+
+context = ModbusServerContext(slaves=store, single=True)
+
+# Server identification
+identity = ModbusDeviceIdentification()
+identity.VendorName = 'pymodbus'
+identity.ProductCode = 'PM'
+identity.VendorUrl = 'http://github.com/bashwork/pymodbus/'
+identity.ProductName = 'pymodbus Server'
+identity.ModelName = 'pymodbus Server'
+identity.MajorMinorRevision = '1.0'
+
+# Start server
+print("Starting Modbus TCP Server on port 502...")
+StartTcpServer(context, identity=identity, address=("localhost", 502))</code></pre>
+                    
+                    <h3>Server Implementation Considerations</h3>
+                    <div class="considerations">
+                        <div class="consideration">
+                            <h4>Threading</h4>
+                            <p>Handle multiple client connections simultaneously using threads or async programming</p>
+                        </div>
+                        
+                        <div class="consideration">
+                            <h4>Data Persistence</h4>
+                            <p>Implement data storage mechanisms for maintaining register values across sessions</p>
+                        </div>
+                        
+                        <div class="consideration">
+                            <h4>Security</h4>
+                            <p>Consider implementing access controls and connection limits for production environments</p>
+                        </div>
+                        
+                        <div class="consideration">
+                            <h4>Monitoring</h4>
+                            <p>Add logging and monitoring capabilities to track client connections and requests</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Modbus Gotchas Section -->
+        <section id="gotchas" class="section">
+            <div class="container">
+                <h2>Modbus Gotchas</h2>
+                <p class="section-intro">Common pitfalls and manufacturer-specific implementations that can cause confusion.</p>
+                
+                <div class="gotcha-grid">
+                    <div class="gotcha-card">
+                        <div class="gotcha-icon">🔢</div>
+                        <h3>Decimal Number Representations</h3>
+                        <p class="gotcha-description">Different manufacturers represent decimal numbers in various ways, especially when negative values are involved. Here are the most common approaches:</p>
+                        
+                        <div class="representation-examples">
+                            <div class="representation-card">
+                                <h4>1. IEEE 754 32-bit Float</h4>
+                                <div class="format-info">
+                                    <p><strong>Registers Used:</strong> 2 (32-bit total)</p>
+                                    <p><strong>Range:</strong> ±3.4 × 10³⁸ (very large numbers)</p>
+                                    <p><strong>How Sign is Determined:</strong> First bit of the 32-bit value (0 = positive, 1 = negative)</p>
+                                    <p><strong>Scaling:</strong> Built into the floating-point format - no external scale factor needed</p>
+                                    <p><strong>Used by:</strong> Modern PLCs, SCADA systems, energy meters</p>
+                                </div>
+                                
+                                <table class="example-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Example Value</th>
+                                            <th>Register 1 (Hex)</th>
+                                            <th>Register 2 (Hex)</th>
+                                            <th>Sign Bit</th>
+                                            <th>What Device Shows</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>-123.45</td>
+                                            <td>0xC2F6</td>
+                                            <td>0xE666</td>
+                                            <td>1 (negative)</td>
+                                            <td>-123.45°C</td>
+                                        </tr>
+                                        <tr>
+                                            <td>1234.56</td>
+                                            <td>0x449A</td>
+                                            <td>0x51EC</td>
+                                            <td>0 (positive)</td>
+                                            <td>1234.56 kW</td>
+                                        </tr>
+                                        <tr>
+                                            <td>-0.001</td>
+                                            <td>0xBA83</td>
+                                            <td>0x126F</td>
+                                            <td>1 (negative)</td>
+                                            <td>-0.001 bar</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="format-notes"><strong>Pros:</strong> Handles very large and very small numbers, standard format<br>
+                                <strong>Cons:</strong> Can have tiny rounding errors, uses 2 registers<br>
+                                <strong>Note:</strong> The device automatically handles all the complex math - you just get the final decimal value</p>
+                            </div>
+
+                            <div class="representation-card">
+                                <h4>2. Scaled Signed Integer</h4>
+                                <div class="format-info">
+                                    <p><strong>Registers Used:</strong> 1 (16-bit)</p>
+                                    <p><strong>Range:</strong> -32,768 to +32,767 (before scaling)</p>
+                                    <p><strong>How Sign is Determined:</strong> If register value > 32,767 then it's negative (two's complement)</p>
+                                    <p><strong>How Scaling Works:</strong> Device stores (actual value × scale factor). To get real value: register value ÷ scale factor</p>
+                                    <p><strong>Used by:</strong> Temperature sensors, pressure transmitters, simple devices</p>
+                                </div>
+                                
+                                <table class="example-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Example Value</th>
+                                            <th>Scale Factor</th>
+                                            <th>Stored As<br>(value × scale)</th>
+                                            <th>Register Value (Hex)</th>
+                                            <th>Sign Check</th>
+                                            <th>What Device Shows</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>-123.45</td>
+                                            <td>× 100</td>
+                                            <td>-12,345</td>
+                                            <td>0xCFC7 (53,191)</td>
+                                            <td>53,191 > 32,767 = Negative</td>
+                                            <td>-123.45°C</td>
+                                        </tr>
+                                        <tr>
+                                            <td>25.6</td>
+                                            <td>× 10</td>
+                                            <td>256</td>
+                                            <td>0x0100 (256)</td>
+                                            <td>256 ≤ 32,767 = Positive</td>
+                                            <td>25.6°C</td>
+                                        </tr>
+                                        <tr>
+                                            <td>-50.25</td>
+                                            <td>× 100</td>
+                                            <td>-5,025</td>
+                                            <td>0xEC37 (60,471)</td>
+                                            <td>60,471 > 32,767 = Negative</td>
+                                            <td>-50.25 psi</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="format-notes"><strong>Pros:</strong> Exact decimal representation, efficient, single register<br>
+                                <strong>Cons:</strong> Limited range, need to know scale factor from manual<br>
+                                <strong>Scale Factor Examples:</strong> ×10 = 1 decimal place, ×100 = 2 decimal places, ×1000 = 3 decimal places</p>
+                            </div>
+
+                            <div class="representation-card">
+                                <h4>3. Packed BCD (Binary Coded Decimal)</h4>
+                                <div class="format-info">
+                                    <p><strong>Registers Used:</strong> 2-4 (depends on precision needed)</p>
+                                    <p><strong>Range:</strong> Varies, typically 4-8 decimal digits</p>
+                                    <p><strong>How Sign is Determined:</strong> Special nibble (4-bit) holds sign: 0-7 = positive, 8-F = negative</p>
+                                    <p><strong>How Scaling Works:</strong> Each nibble represents one decimal digit exactly - no math needed</p>
+                                    <p><strong>Used by:</strong> Flow meters, financial systems, older industrial devices</p>
+                                </div>
+                                
+                                <table class="example-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Example Value</th>
+                                            <th>Register 1 (Hex)</th>
+                                            <th>Register 2 (Hex)</th>
+                                            <th>Sign Nibble</th>
+                                            <th>Digits</th>
+                                            <th>What Device Shows</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>-123.45</td>
+                                            <td>0x8123</td>
+                                            <td>0x4500</td>
+                                            <td>8 = Negative</td>
+                                            <td>1,2,3 . 4,5</td>
+                                            <td>-123.45 L/min</td>
+                                        </tr>
+                                        <tr>
+                                            <td>987.65</td>
+                                            <td>0x0987</td>
+                                            <td>0x6500</td>
+                                            <td>0 = Positive</td>
+                                            <td>9,8,7 . 6,5</td>
+                                            <td>987.65 gal</td>
+                                        </tr>
+                                        <tr>
+                                            <td>-0.12</td>
+                                            <td>0xF000</td>
+                                            <td>0x1200</td>
+                                            <td>F = Negative</td>
+                                            <td>0,0,0 . 1,2</td>
+                                            <td>-0.12 mph</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="format-notes"><strong>Pros:</strong> No rounding errors, human-readable in hex, each digit stored exactly<br>
+                                <strong>Cons:</strong> Inefficient storage, more complex to parse<br>
+                                <strong>Sign Convention:</strong> Some manufacturers use F for negative, others use 8-F range</p>
+                            </div>
+
+                            <div class="representation-card">
+                                <h4>4. Offset Binary (Excess-K)</h4>
+                                <div class="format-info">
+                                    <p><strong>Registers Used:</strong> 1 (16-bit)</p>
+                                    <p><strong>Range:</strong> Manufacturer specific (e.g., -200°C to +200°C)</p>
+                                    <p><strong>How Sign is Determined:</strong> No negative values stored! Offset makes all values positive</p>
+                                    <p><strong>How Scaling Works:</strong> (Register value ÷ scale factor) - offset = actual value</p>
+                                    <p><strong>Used by:</strong> Temperature controllers, level sensors, pressure gauges</p>
+                                </div>
+                                
+                                <table class="example-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Example Value</th>
+                                            <th>Offset Used</th>
+                                            <th>Scale Factor</th>
+                                            <th>Calculation</th>
+                                            <th>Register Value (Hex)</th>
+                                            <th>What Device Shows</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>-123.45°C</td>
+                                            <td>+200</td>
+                                            <td>× 100</td>
+                                            <td>(-123.45 + 200) × 100 = 7,655</td>
+                                            <td>0x1DE7</td>
+                                            <td>-123.45°C</td>
+                                        </tr>
+                                        <tr>
+                                            <td>75.2°C</td>
+                                            <td>+200</td>
+                                            <td>× 100</td>
+                                            <td>(75.2 + 200) × 100 = 27,520</td>
+                                            <td>0x6B80</td>
+                                            <td>75.2°C</td>
+                                        </tr>
+                                        <tr>
+                                            <td>-50.0 psi</td>
+                                            <td>+100</td>
+                                            <td>× 10</td>
+                                            <td>(-50 + 100) × 10 = 500</td>
+                                            <td>0x01F4</td>
+                                            <td>-50.0 psi</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="format-notes"><strong>Pros:</strong> Avoids negative numbers completely, simple for device firmware<br>
+                                <strong>Cons:</strong> Need to know offset value from manual, not intuitive<br>
+                                <strong>Common Offsets:</strong> Temperature: +200°C, Pressure: +100 psi, Level: +50%</p>
+                            </div>
+
+                            <div class="representation-card">
+                                <h4>5. ASCII Decimal Strings</h4>
+                                <div class="format-info">
+                                    <p><strong>Registers Used:</strong> 3-6 (depends on number length)</p>
+                                    <p><strong>Range:</strong> Flexible, limited by register count</p>
+                                    <p><strong>How Sign is Determined:</strong> ASCII minus character "-" (0x2D) as first character</p>
+                                    <p><strong>How Scaling Works:</strong> No scaling - decimal point "." (0x2E) stored as character</p>
+                                    <p><strong>Used by:</strong> Display meters, some legacy RTU devices</p>
+                                </div>
+                                
+                                <table class="example-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Example Value</th>
+                                            <th>Register 1</th>
+                                            <th>Register 2</th>
+                                            <th>Register 3</th>
+                                            <th>Sign Character</th>
+                                            <th>What Device Shows</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>-123.45</td>
+                                            <td>0x2D31 ("-1")</td>
+                                            <td>0x3233 ("23")</td>
+                                            <td>0x2E34 (".4")</td>
+                                            <td>0x2D = "-"</td>
+                                            <td>-123.45</td>
+                                        </tr>
+                                        <tr>
+                                            <td>56.78</td>
+                                            <td>0x3536 ("56")</td>
+                                            <td>0x2E37 (".7")</td>
+                                            <td>0x3800 ("8\0")</td>
+                                            <td>No sign = "+"</td>
+                                            <td>56.78</td>
+                                        </tr>
+                                        <tr>
+                                            <td>-9.1</td>
+                                            <td>0x2D39 ("-9")</td>
+                                            <td>0x2E31 (".1")</td>
+                                            <td>0x0000</td>
+                                            <td>0x2D = "-"</td>
+                                            <td>-9.1</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <p class="format-notes"><strong>Pros:</strong> Human readable, flexible precision, exactly what you see<br>
+                                <strong>Cons:</strong> Inefficient, uses many registers, slow transmission<br>
+                                <strong>Characters:</strong> "0"-"9" = 0x30-0x39, "." = 0x2E, "-" = 0x2D, space/null = 0x00</p>
+                            </div>
+                        </div>
+
+                        <div class="gotcha-tips">
+                            <h4>💡 Tips for Handling Decimal Representations</h4>
+                            <ul>
+                                <li><strong>Always check documentation:</strong> Manufacturer manuals specify the exact format used</li>
+                                <li><strong>Test with known values:</strong> Send known inputs and verify the register outputs</li>
+                                <li><strong>Look for scaling info:</strong> Check for scale factors, decimal places, or unit multipliers</li>
+                                <li><strong>Watch byte order:</strong> IEEE floats can be big-endian or little-endian</li>
+                                <li><strong>Validate ranges:</strong> Check if the parsed values make sense for the application</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quiz Section -->
+        <section id="quiz" class="section">
+            <div class="container">
+                <h2>Modbus TCP Quick Quiz</h2>
+                
+                <div class="quiz-container">
+                    <div class="quiz-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <span class="progress-text" id="progressText">Question 1 of 8</span>
+                    </div>
+                    
+                    <div class="question-container" id="questionContainer">
+                        <!-- Questions will be dynamically loaded here -->
+                    </div>
+                    
+                    <div class="quiz-controls">
+                        <button id="prevBtn" class="quiz-btn" disabled>Previous</button>
+                        <button id="nextBtn" class="quiz-btn">Next</button>
+                        <button id="submitBtn" class="quiz-btn submit-btn" style="display: none;">Submit Quiz</button>
+                    </div>
+                    
+                    <div class="quiz-results" id="quizResults" style="display: none;">
+                        <h3>Quiz Results</h3>
+                        <div class="score-display" id="scoreDisplay"></div>
+                        <div class="answers-review" id="answersReview"></div>
+                        <button id="retakeBtn" class="quiz-btn">Retake Quiz</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Modbus TCP Introduction Guide. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="modbus-tcp-script.js"></script>
+</body>
+</html>
