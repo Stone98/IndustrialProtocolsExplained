@@ -87,6 +87,83 @@ const quizData = [
         ],
         correct: 1,
         explanation: "The Protocol ID field in Modbus TCP is always 0x0000 to identify it as a Modbus protocol."
+    },
+    {
+        question: "What does MBAP stand for in Modbus TCP?",
+        options: [
+            "Modbus Binary Application Protocol",
+            "Modbus Basic Access Point",
+            "Modbus Application Protocol Header",
+            "Modbus Bus Access Protocol"
+        ],
+        correct: 2,
+        explanation: "MBAP stands for Modbus Application Protocol Header, which is the 7-byte header that precedes the PDU in Modbus TCP messages."
+    },
+    {
+        question: "What is the maximum size of a Modbus TCP message?",
+        options: [
+            "256 bytes",
+            "260 bytes",
+            "253 bytes",
+            "512 bytes"
+        ],
+        correct: 1,
+        explanation: "The maximum Modbus TCP message size is 260 bytes: 7 bytes MBAP header + 253 bytes maximum PDU size."
+    },
+    {
+        question: "Which function code is used to write multiple coils?",
+        options: [
+            "05",
+            "15",
+            "16",
+            "06"
+        ],
+        correct: 1,
+        explanation: "Function code 15 (0x0F) is used to write multiple coils, while function code 05 writes a single coil."
+    },
+    {
+        question: "What happens when a Modbus TCP server receives a request with an unsupported function code?",
+        options: [
+            "It ignores the request",
+            "It returns an exception response with code 01",
+            "It returns an exception response with code 02",
+            "It closes the connection"
+        ],
+        correct: 1,
+        explanation: "When a server receives an unsupported function code, it returns an exception response with exception code 01 (Illegal Function)."
+    },
+    {
+        question: "In Modbus TCP addressing, what is the valid range for register addresses?",
+        options: [
+            "0 to 65535",
+            "1 to 65536",
+            "0 to 9999",
+            "1 to 10000"
+        ],
+        correct: 0,
+        explanation: "Modbus TCP uses 16-bit addressing, allowing register addresses from 0 to 65535 (0x0000 to 0xFFFF)."
+    },
+    {
+        question: "What is the purpose of the Unit Identifier field in the MBAP header?",
+        options: [
+            "To identify the TCP connection",
+            "To specify the Modbus device address",
+            "To indicate the message priority",
+            "To define the data encoding"
+        ],
+        correct: 1,
+        explanation: "The Unit Identifier field specifies the Modbus device address, allowing multiple logical devices behind a single TCP connection."
+    },
+    {
+        question: "Which transport protocol does Modbus TCP use?",
+        options: [
+            "UDP (User Datagram Protocol)",
+            "ICMP (Internet Control Message Protocol)",
+            "TCP (Transmission Control Protocol)",
+            "SCTP (Stream Control Transmission Protocol)"
+        ],
+        correct: 2,
+        explanation: "Modbus TCP uses TCP (Transmission Control Protocol) as its transport layer, providing reliable, connection-oriented communication."
     }
 ];
 

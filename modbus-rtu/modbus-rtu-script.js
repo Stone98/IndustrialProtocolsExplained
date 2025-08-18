@@ -87,6 +87,83 @@ const quizData = [
         ],
         correct: 0,
         explanation: "While Modbus RTU can operate at various baud rates, 9600 bps is the most commonly used standard rate. It provides a good balance between speed and reliability over longer cable runs."
+    },
+    {
+        question: "What is the minimum Silent Interval time required between Modbus RTU frames?",
+        options: [
+            "1.5 character times",
+            "2.5 character times",
+            "3.5 character times",
+            "4.5 character times"
+        ],
+        correct: 2,
+        explanation: "The minimum Silent Interval between Modbus RTU frames is 3.5 character times. This ensures proper frame separation and message detection on the serial bus."
+    },
+    {
+        question: "Which wire configuration is typically used for RS-485 in Modbus RTU networks?",
+        options: [
+            "2-wire half-duplex",
+            "4-wire full-duplex",
+            "3-wire configuration",
+            "Single wire plus ground"
+        ],
+        correct: 0,
+        explanation: "Modbus RTU typically uses 2-wire half-duplex RS-485, where the same pair of wires (A and B) is used for both transmitting and receiving data."
+    },
+    {
+        question: "What is the maximum recommended cable length for a Modbus RTU network at 9600 bps?",
+        options: [
+            "100 meters",
+            "500 meters",
+            "1200 meters",
+            "2000 meters"
+        ],
+        correct: 2,
+        explanation: "At 9600 bps, the maximum recommended cable length for Modbus RTU is typically 1200 meters (4000 feet), though this can vary based on cable quality and environmental conditions."
+    },
+    {
+        question: "In Modbus RTU, what is the purpose of termination resistors?",
+        options: [
+            "To provide power to devices",
+            "To prevent signal reflections",
+            "To increase transmission speed",
+            "To detect communication errors"
+        ],
+        correct: 1,
+        explanation: "Termination resistors (typically 120 ohms) are placed at both ends of the RS-485 bus to prevent signal reflections that can cause communication errors."
+    },
+    {
+        question: "What happens if two Modbus RTU devices have the same slave address?",
+        options: [
+            "The network operates normally",
+            "Communication conflicts occur",
+            "Only the first device responds",
+            "The master automatically reassigns addresses"
+        ],
+        correct: 1,
+        explanation: "If two devices have the same slave address, communication conflicts will occur as both devices will attempt to respond to the same requests, causing data corruption."
+    },
+    {
+        question: "Which of the following is a valid Modbus RTU slave address?",
+        options: [
+            "0",
+            "248",
+            "255",
+            "150"
+        ],
+        correct: 3,
+        explanation: "Valid Modbus RTU slave addresses range from 1 to 247. Address 0 is reserved for broadcast messages, and addresses 248-255 are reserved for special purposes."
+    },
+    {
+        question: "What is the typical response timeout setting for Modbus RTU communication?",
+        options: [
+            "100 milliseconds",
+            "500 milliseconds",
+            "1-5 seconds",
+            "10 seconds"
+        ],
+        correct: 2,
+        explanation: "Typical response timeout for Modbus RTU is 1-5 seconds, allowing sufficient time for slave devices to process requests and respond, especially in networks with multiple devices."
     }
 ];
 
