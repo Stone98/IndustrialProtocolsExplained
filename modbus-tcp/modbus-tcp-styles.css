@@ -39,6 +39,16 @@ body {
     align-items: center;
 }
 
+.home-button {
+    color: white;
+    text-decoration: none;
+}
+
+.home-button :visited {
+    color: white;
+    text-decoration: none;
+}
+
 .nav-logo {
     font-size: 1.5rem;
     font-weight: bold;
