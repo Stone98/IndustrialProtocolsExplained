@@ -3,8 +3,6 @@
 > Comprehensive, interactive guides to understand and implement industrial automation protocols. From basic concepts to advanced implementation with real-world examples.
 
 [![Demo](https://img.shields.io/badge/Demo-Live%20Site-blue?style=for-the-badge)](https://stone98.github.io/IndustrialProtocolsExplained/)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Contributions](https://img.shields.io/badge/Contributions-Welcome-orange?style=for-the-badge)](CONTRIBUTING.md)
 
 ## 📖 About
 
